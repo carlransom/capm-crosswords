@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="color-scheme" content="light dark" />
-    <meta name="description" content="Fifteen crosswords built from the CAPM exam content outline — 120 terms across every exam domain, with timer, check and reveal tools." />
+    <meta name="description" content="Fifteen crosswords built from the CAPM exam content outline — 117 terms across every exam domain, with timer, check and reveal tools." />
     <meta name="theme-color" id="themeColorMeta" content="#f4f1ea" />
     <link rel="manifest" href="manifest.json" />
     <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png" />
@@ -19,12 +19,12 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,600;8..60,800&family=Public+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
     <script>
-      (function(){var dark=false;try{dark=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches;}catch(e){}document.documentElement.setAttribute("data-theme",dark?"dark":"light");var tc=document.getElementById("themeColorMeta");if(tc)tc.setAttribute("content",dark?"#12161d":"#f4f1ea");})();
+      (function(){var dark=false,saved=null;try{saved=window.localStorage.getItem("capm-crosswords-theme");}catch(e){}if(saved==="dark"||saved==="light"){dark=saved==="dark";}else{try{dark=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches;}catch(e){}}document.documentElement.setAttribute("data-theme",dark?"dark":"light");var tc=document.getElementById("themeColorMeta");if(tc)tc.setAttribute("content",dark?"#12161d":"#f4f1ea");})();
     </script>
     <style>
       :root{
         --bg:#f4f1ea; --surface:#fffdf8; --surface2:#ece7da; --ink:#1c2430; --ink2:#4c5563;
-        --line:#d8d2c2; --accent:#0e5a4d; --accent-ink:#ffffff; --gold:#b07d1e; --gold-soft:#f3e5c3;
+        --line:#d8d2c2; --accent:#0e5a4d; --accent-ink:#ffffff; --gold:#7a5b14; --gold-soft:#f3e5c3;
         --good:#177245; --good-bg:#dff2e4; --bad:#b3261e; --bad-bg:#fbe3e1;
         --cell:#ffffff; --cell-block:#232a35; --cell-active:#fdeec9; --cell-word:#e8f2ee; --cell-num:#6b7280;
         --shadow:0 10px 28px rgba(28,36,48,.10);
@@ -311,144 +311,144 @@
         id:"stakeholders", domain:"Cross-Cutting · Stakeholders & Communications",
         title:"Stakeholders & Communications",
         blurb:"Power, interest, salience, and engagement — knowing who matters to the project and keeping them involved.",
-        rows:13, cols:14,
+        rows:12, cols:11,
         words:[
-          ["FEEDBACK",0,3,"A","Information returned about reactions to a product, service, or someone's performance"],
-          ["CONFLICT",0,0,"D","A disagreement between stakeholders or team members that the project manager must help resolve"],
-          ["STAKEHOLDER",1,1,"A","Anyone who can affect, be affected by, or perceive themselves to be affected by the project"],
-          ["SALIENCE",1,1,"D","The model that classifies stakeholders by their power, legitimacy, and urgency"],
-          ["ENGAGEMENT",1,5,"D","Keeping stakeholders involved, informed, and committed throughout the project"],
-          ["INFLUENCE",3,12,"D","A stakeholder's ability to affect project decisions, direction, and outcomes"],
-          ["REGISTER",8,6,"A","The document that lists stakeholders along with their interest and influence — the stakeholder ___"],
-          ["POWER",11,2,"A","A stakeholder's capacity to impose their will on the project — one axis of the power/interest grid"]
+          ["FEEDBACK",0,3,"D","Information returned about reactions to a product, service, or someone's performance"],
+          ["CONFLICT",4,10,"D","A disagreement between stakeholders or team members that the project manager must help resolve"],
+          ["ENDUSER",1,8,"D","The people who will ultimately use the product or result the project delivers (two words, no space)"],
+          ["SALIENCE",4,1,"D","The model that classifies stakeholders by their power, legitimacy, and urgency"],
+          ["ENGAGEMENT",11,1,"A","Keeping stakeholders involved, informed, and committed throughout the project"],
+          ["INFLUENCE",9,0,"A","A stakeholder's ability to affect project decisions, direction, and outcomes"],
+          ["ANALYSIS",5,1,"A","The process of identifying stakeholders and documenting their interests, influence, and impact — stakeholder ___"],
+          ["POWER",2,0,"A","A stakeholder's capacity to impose their will on the project — one axis of the power/interest grid"]
         ]
       },
       {
         id:"scope", domain:"Cross-Cutting · Scope Management",
         title:"Scope Management",
         blurb:"Statements, exclusions, the WBS, and the eternal fight against scope creep and gold plating.",
-        rows:13, cols:14,
+        rows:10, cols:11,
         words:[
-          ["CREEP",0,8,"A","The uncontrolled expansion of scope without adjustments to time, cost, or resources — scope ___"],
-          ["SCOPE",1,2,"A","All the work — and only the work — required to complete the project successfully"],
-          ["STATEMENT",1,2,"D","The detailed description of the project and product scope — the scope ___"],
-          ["EXCLUSIONS",1,6,"D","Work that is specifically out of scope, spelled out in the scope statement to prevent misunderstandings"],
-          ["ACCEPTANCE",2,13,"D","The criteria a deliverable must meet before the customer will formally sign off on it"],
-          ["WBS",5,8,"A","The deliverable-oriented breakdown of all project work into smaller, manageable pieces (initials)"],
-          ["GOLDPLATING",11,2,"A","Adding extra features beyond the agreed scope without being asked — a scope control no-no"],
-          ["VALIDATE",12,3,"A","The process of formal acceptance of completed deliverables by the customer or sponsor — ___ scope"]
+          ["CREEP",0,0,"A","The uncontrolled expansion of scope without adjustments to time, cost, or resources — scope ___"],
+          ["PRODUCT",7,0,"A","Scope comes in two flavors: project scope and ___ scope — the features and functions of the deliverable itself"],
+          ["STATEMENT",9,2,"A","The detailed description of the project and product scope — the scope ___"],
+          ["EXCLUSIONS",0,2,"D","Work that is specifically out of scope, spelled out in the scope statement to prevent misunderstandings"],
+          ["SIGNOFF",1,10,"D","The formal confirmation that a deliverable meets its acceptance criteria — customer ___"],
+          ["WBS",5,0,"A","The deliverable-oriented breakdown of all project work into smaller, manageable pieces (initials)"],
+          ["GOLDPLATING",3,0,"A","Adding extra features beyond the agreed scope without being asked — a scope control no-no"],
+          ["VALIDATE",0,8,"D","The process of formal acceptance of completed deliverables by the customer or sponsor — ___ scope"]
         ]
       },
       {
         id:"quality", domain:"Cross-Cutting · Quality Management",
         title:"Quality Management",
         blurb:"Audits, inspections, standards, and prevention — building quality in rather than inspecting it in.",
-        rows:13, cols:14,
+        rows:12, cols:10,
         words:[
-          ["CHECKLIST",0,1,"A","A structured tool listing steps or items to verify, used to check quality consistently"],
-          ["PREVENTION",0,12,"D","Keeping errors out of the process in the first place — preferred over inspection"],
-          ["QUALITY",2,2,"A","The degree to which a set of inherent characteristics fulfills requirements"],
-          ["AUDIT",2,4,"D","A structured review to determine whether project activities comply with policies, processes, and procedures"],
-          ["STANDARD",4,10,"D","A document of guidelines or characteristics that activities and results should conform to"],
-          ["INSPECTION",7,1,"A","Examining a work product to determine whether it conforms to documented standards"],
-          ["BENCHMARK",9,1,"A","Comparing actual or planned practices against those of comparable organizations to identify best practices"],
-          ["TESTING",11,3,"A","Evaluating a product through planned trials to find defects before delivery"]
+          ["CHECKLIST",2,2,"D","A structured tool listing steps or items to verify, used to check quality consistently"],
+          ["PREVENTION",4,0,"A","Keeping errors out of the process in the first place — preferred over inspection"],
+          ["QUALITY",0,2,"A","The degree to which a set of inherent characteristics fulfills requirements"],
+          ["AUDIT",9,4,"A","A structured review to determine whether project activities comply with policies, processes, and procedures"],
+          ["STANDARD",1,9,"D","A document of guidelines or characteristics that activities and results should conform to"],
+          ["INSPECTION",1,0,"D","Examining a work product to determine whether it conforms to documented standards"],
+          ["BENCHMARK",3,4,"D","Comparing actual or planned practices against those of comparable organizations to identify best practices"],
+          ["TESTING",0,7,"D","Evaluating a product through planned trials to find defects before delivery"]
         ]
       },
       {
         id:"resources", domain:"Cross-Cutting · Resources & Team Leadership",
         title:"Resources & Team Leadership",
         blurb:"RAM charts, availability, motivation, and negotiation — leading the people who do the work.",
-        rows:14, cols:14,
+        rows:14, cols:12,
         words:[
-          ["RESOURCE",1,1,"A","Team members, equipment, materials, and facilities needed to complete the project work"],
-          ["RAM",1,1,"D","The matrix that maps work packages to the people responsible for them (initials)"],
-          ["AVAILABILITY",2,0,"D","Whether a resource is actually free and able to work when the schedule needs them"],
-          ["LEADERSHIP",4,2,"A","Inspiring and guiding the team toward the project vision, rather than just managing tasks"],
-          ["TRAINING",4,13,"D","Developing team members' knowledge and skills so they can perform their project roles"],
-          ["MOTIVATION",6,1,"A","What drives team members to perform — Herzberg and Maslow are tested favorites on this"],
-          ["NEGOTIATION",8,2,"A","How the project manager secures resources and resolves competing demands with functional managers"],
-          ["TEAMWORK",11,3,"A","Cooperative effort by the group toward a common goal — built through team development stages"]
+          ["RESOURCE",4,2,"A","Team members, equipment, materials, and facilities needed to complete the project work"],
+          ["RAM",2,2,"A","The matrix that maps work packages to the people responsible for them (initials)"],
+          ["AVAILABILITY",8,0,"A","Whether a resource is actually free and able to work when the schedule needs them"],
+          ["LEADERSHIP",0,3,"D","Inspiring and guiding the team toward the project vision, rather than just managing tasks"],
+          ["TRAINING",3,7,"D","Developing team members' knowledge and skills so they can perform their project roles"],
+          ["MOTIVATION",3,5,"D","What drives team members to perform — Herzberg and Maslow are tested favorites on this"],
+          ["NEGOTIATION",3,9,"D","How the project manager secures resources and resolves competing demands with functional managers"],
+          ["TEAMWORK",6,0,"D","Cooperative effort by the group toward a common goal — built through team development stages"]
         ]
       },
       {
         id:"integration", domain:"Cross-Cutting · Integration & Governance",
         title:"Integration & Governance",
         blurb:"Pulling all the pieces together: decisions, monitoring, lessons learned, and closing properly.",
-        rows:14, cols:14,
+        rows:11, cols:12,
         words:[
-          ["APPROVAL",0,12,"D","Formal sign-off that authorizes work, a deliverable, or a change to proceed"],
-          ["INTEGRATION",2,0,"A","The coordination of all project elements — processes, plans, and changes — into a unified whole"],
-          ["GOVERNANCE",2,4,"D","The framework of authority, decision-making, and oversight that guides the project"],
-          ["MONITORING",4,0,"D","Collecting and measuring performance data to compare actual progress against the plan"],
-          ["DECISION",4,6,"A","A conclusion reached after consideration — governance defines who gets to make each one"],
-          ["CHANGE",6,6,"A","A formal proposal to modify a document, deliverable, or baseline — it goes through integrated control"],
-          ["LESSONS",10,6,"A","Knowledge gained during the project, documented so future projects can benefit — ___ learned"],
-          ["CLOSURE",12,3,"A","Finalizing all activities, handing over the product, and releasing resources at the end — project ___"]
+          ["APPROVAL",0,1,"A","Formal sign-off that authorizes work, a deliverable, or a change to proceed"],
+          ["INTEGRATION",8,0,"A","The coordination of all project elements — processes, plans, and changes — into a unified whole"],
+          ["GOVERNANCE",1,10,"D","The framework of authority, decision-making, and oversight that guides the project"],
+          ["MONITORING",1,0,"D","Collecting and measuring performance data to compare actual progress against the plan"],
+          ["DECISION",2,4,"A","A conclusion reached after consideration — governance defines who gets to make each one"],
+          ["REQUEST",2,2,"D","A change ___ is the formal proposal to modify a document, deliverable, or baseline — it goes through integrated change control"],
+          ["LESSONS",0,8,"D","Knowledge gained during the project, documented so future projects can benefit — ___ learned"],
+          ["CLOSURE",10,4,"A","Finalizing all activities, handing over the product, and releasing resources at the end — project ___"]
         ]
       },
       {
         id:"procurement", domain:"Cross-Cutting · Procurement & Contracts",
         title:"Procurement & Contracts",
         blurb:"Vendors, bids, fixed-price deals, and agreements — buying what the project needs from outside.",
-        rows:13, cols:15,
+        rows:11, cols:11,
         words:[
-          ["PROCUREMENT",1,1,"A","Obtaining goods and services from outside the project team or organization"],
-          ["CONTRACT",1,4,"D","A mutually binding agreement that obligates the seller to provide something of value to the buyer"],
-          ["PURCHASE",3,13,"D","A ___ order is a commercial document used to buy products or services from a seller"],
-          ["VENDOR",4,6,"A","An external seller that provides products, services, or results to the project"],
-          ["FIXEDPRICE",9,1,"A","A contract type where the fee is set in advance and doesn't change with the seller's costs (two words, no space)"],
-          ["BIDDER",10,3,"A","A seller competing for the work — they attend a ___ conference to ask questions before proposals are due"],
-          ["SOW",11,6,"A","The narrative description of the work to be procured (initials)"],
-          ["AGREEMENT",12,2,"A","A documented arrangement between buyer and seller defining obligations for both parties"]
+          ["PROCUREMENT",5,0,"A","Obtaining goods and services from outside the project team or organization"],
+          ["CONTRACT",8,0,"A","A mutually binding agreement that obligates the seller to provide something of value to the buyer"],
+          ["PURCHASE",3,5,"D","A ___ order is a commercial document used to buy products or services from a seller"],
+          ["VENDOR",3,9,"D","An external seller that provides products, services, or results to the project"],
+          ["FIXEDPRICE",0,0,"D","A contract type where the fee is set in advance and doesn't change with the seller's costs (two words, no space)"],
+          ["BIDDER",10,1,"A","A seller competing for the work — they attend a ___ conference to ask questions before proposals are due"],
+          ["SOW",4,2,"D","The narrative description of the work to be procured (initials)"],
+          ["AGREEMENT",0,7,"D","A documented arrangement between buyer and seller defining obligations for both parties"]
         ]
       },
       {
         id:"schedule-tools", domain:"Cross-Cutting · Schedule Tools & Techniques",
         title:"Schedule Tools & Techniques",
         blurb:"Critical path, float, leads and lags, and dependencies — the mechanics behind the project timeline.",
-        rows:14, cols:14,
+        rows:10, cols:12,
         words:[
-          ["DURATION",0,3,"A","The total number of work periods required to complete an activity"],
-          ["CRITICALPATH",1,0,"A","The sequence of activities that determines the shortest possible project duration (two words, no space)"],
-          ["DEPENDENCY",3,12,"D","A relationship between two activities where one relies on the other to start or finish"],
-          ["FLOAT",4,2,"A","The amount of time an activity can be delayed without delaying the project finish date"],
-          ["NETWORK",6,1,"A","The diagram that shows activities and their logical relationships — the schedule ___ diagram"],
-          ["PREDECESSOR",8,1,"A","An activity that must start or finish before another activity can proceed"],
-          ["LAG",10,4,"A","A delay between a predecessor finishing and its successor starting"],
-          ["LEAD",10,4,"D","An acceleration that lets a successor start before its predecessor has finished"]
+          ["DURATION",0,0,"A","The total number of work periods required to complete an activity"],
+          ["CRITICALPATH",8,0,"A","The sequence of activities that determines the shortest possible project duration (two words, no space)"],
+          ["DEPENDENCY",0,0,"D","A relationship between two activities where one relies on the other to start or finish"],
+          ["FLOAT",0,9,"D","The amount of time an activity can be delayed without delaying the project finish date"],
+          ["NETWORK",4,0,"A","The diagram that shows activities and their logical relationships — the schedule ___ diagram"],
+          ["PREDECESSOR",2,0,"A","An activity that must start or finish before another activity can proceed"],
+          ["LAG",7,9,"D","A delay between a predecessor finishing and its successor starting"],
+          ["LEAD",6,6,"D","An acceleration that lets a successor start before its predecessor has finished"]
         ]
       },
       {
         id:"cost", domain:"Cross-Cutting · Cost & Budget Control",
         title:"Cost & Budget Control",
         blurb:"Estimating techniques, reserves, and funding — how the budget is built and defended.",
-        rows:13, cols:14,
+        rows:12, cols:10,
         words:[
-          ["ESTIMATE",1,2,"A","A quantitative assessment of the likely cost of the resources needed to complete the work"],
-          ["ANALOGOUS",1,7,"D","The estimating technique that uses actual costs from a previous, similar project as the basis"],
-          ["SUNK",3,10,"A","Costs that have already been incurred and cannot be recovered — ___ costs, ignored in decisions"],
-          ["FUNDING",6,13,"D","Money provided for the project, often released in increments aligned to milestones"],
-          ["EXPENSES",9,2,"A","Costs incurred in carrying out the project work, tracked against the budget"],
-          ["PARAMETRIC",10,1,"A","Estimating that uses a statistical relationship between historical data and other variables, like cost per square foot"],
-          ["BUDGETING",11,2,"A","Aggregating the estimated costs of activities and work packages to establish the cost baseline"],
-          ["RESERVE",12,4,"A","Provision in the plan for cost or schedule overruns — contingency and management are the two kinds"]
+          ["ESTIMATE",0,3,"D","A quantitative assessment of the likely cost of the resources needed to complete the work"],
+          ["ANALOGOUS",3,1,"D","The estimating technique that uses actual costs from a previous, similar project as the basis"],
+          ["SUNK",8,7,"D","Costs that have already been incurred and cannot be recovered — ___ costs, ignored in decisions"],
+          ["FUNDING",1,8,"D","Money provided for the project, often released in increments aligned to milestones"],
+          ["EXPENSES",0,0,"A","Costs incurred in carrying out the project work, tracked against the budget"],
+          ["PARAMETRIC",5,0,"A","Estimating that uses a statistical relationship between historical data and other variables, like cost per square foot"],
+          ["BUDGETING",10,0,"A","Aggregating the estimated costs of activities and work packages to establish the cost baseline"],
+          ["RESERVE",2,5,"D","Provision in the plan for cost or schedule overruns — contingency and management are the two kinds"]
         ]
       },
       {
         id:"ethics-tailoring", domain:"Cross-Cutting · Ethics, Tailoring & Responsibility",
         title:"Ethics, Tailoring & Responsibility",
         blurb:"Honesty, fairness, adapting your approach to the project — and acting like a professional throughout.",
-        rows:13, cols:14,
+        rows:11, cols:13,
         words:[
-          ["CULTURAL",0,13,"D","Awareness of and sensitivity to differences in values and practices — ___ awareness is a PMI expectation"],
-          ["ETHICS",1,2,"A","The moral principles that guide professional behavior — PMI has a Code of ___ and Professional Conduct"],
-          ["RESPECT",3,1,"A","One of the four values in PMI's Code of Ethics, alongside responsibility, fairness, and honesty"],
-          ["MENTORING",4,0,"D","Guiding and developing less experienced practitioners — part of professional responsibility"],
-          ["TAILORING",5,1,"A","Carefully selecting and adjusting processes, methods, and artifacts to fit the specific project"],
-          ["OWNERSHIP",7,2,"A","Taking responsibility for your decisions and actions as a project practitioner"],
-          ["TRANSPARENCY",9,1,"A","Being open and clear in communications and decision-making — no hidden agendas"],
-          ["INTEGRITY",10,0,"A","Consistently acting honestly and ethically, even when no one is watching"]
+          ["CULTURAL",5,5,"A","Awareness of and sensitivity to differences in values and practices — ___ awareness is a PMI expectation"],
+          ["ETHICS",2,0,"D","The moral principles that guide professional behavior — PMI has a Code of ___ and Professional Conduct"],
+          ["RESPECT",0,5,"D","One of the four values in PMI's Code of Ethics, alongside responsibility, fairness, and honesty"],
+          ["MENTORING",2,8,"D","Guiding and developing less experienced practitioners — part of professional responsibility"],
+          ["TAILORING",2,2,"D","Carefully selecting and adjusting processes, methods, and artifacts to fit the specific project"],
+          ["OWNERSHIP",0,1,"A","Taking responsibility for your decisions and actions as a project practitioner"],
+          ["TRANSPARENCY",3,0,"A","Being open and clear in communications and decision-making — no hidden agendas"],
+          ["INTEGRITY",8,2,"A","Consistently acting honestly and ethically, even when no one is watching"]
         ]
       }
     ];
@@ -476,8 +476,9 @@
       p.state = { entries:{}, correct:{}, revealed:{}, checks:0, solved:false, seconds:0 };
     });
 
-    var totalWords = PUZZLES.reduce(function(s,p){return s+p.words.length;},0);
-    document.getElementById("wordCount").textContent = totalWords;
+    var seenAnswers = {};
+    PUZZLES.forEach(function(p){ p.words.forEach(function(w){ seenAnswers[w[0]]=1; }); });
+    document.getElementById("wordCount").textContent = Object.keys(seenAnswers).length;
 
     /* ---------- pack view ---------- */
     var packGrid = document.getElementById("packGrid");
@@ -644,6 +645,7 @@
       var cd=cellDiv(r,c); if(cd) cd.classList.remove("wrong");
       if (v) move(1);
       updateProgress();
+      maybeWin();
     }
     function onKeydown(e){
       var r=sel.r, c=sel.c;
@@ -715,13 +717,23 @@
       maybeWin();
     }
     function maybeWin(){
-      var all=Object.keys(cur.solution).every(function(k){ return cur.state.correct[k]||cur.state.revealed[k]; });
+      var keys=Object.keys(cur.solution);
+      var all=keys.every(function(k){ return cur.state.correct[k]||cur.state.revealed[k]||cur.state.entries[k]===cur.solution[k]; });
       if (all && !cur.state.solved){
+        // lock in letters that were typed but never checked, so the solved board shows them as correct
+        keys.forEach(function(k){
+          if (!cur.state.correct[k] && !cur.state.revealed[k]){
+            cur.state.correct[k]=true; delete cur.state.entries[k];
+            var rc=k.split(","), cd=cellDiv(+rc[0],+rc[1]);
+            if (cd){ cd.classList.add("correct"); cd.classList.remove("wrong"); }
+          }
+        });
+        paintSelection(); updateProgress();
         cur.state.solved=true; saveTimer();
         var s=cur.state.seconds, m=Math.floor(s/60), ss=s%60;
         var rev=Object.keys(cur.state.revealed).length;
         document.getElementById("winStats").textContent=
-          "Finished in "+m+":"+(ss<10?"0":"")+ss+" · "+cur.state.checks+" check"+(cur.state.checks===1?"":"es")+" used"+
+          "Finished in "+m+":"+(ss<10?"0":"")+ss+" · "+cur.state.checks+" check"+(cur.state.checks===1?"":"s")+" used"+
           (rev? " · "+rev+" letter"+(rev>1?"s":"")+" revealed":" · no letters revealed — clean solve!");
         document.getElementById("winBox").classList.remove("hidden");
         say("Puzzle complete ✓","ok");
@@ -752,8 +764,9 @@
     document.getElementById("btnRevealWord").addEventListener("click", function(){ if(sel.word>=0){ reveal(wordCells(cur,sel.word)); say("Word revealed.",""); } });
     document.getElementById("btnClear").addEventListener("click", function(){
       cur.state.entries={}; cur.state.correct={}; cur.state.revealed={}; cur.state.solved=false;
+      cur.state.seconds=0; cur.state.checks=0;
       document.getElementById("winBox").classList.add("hidden");
-      buildBoard(); paintSelection(); startTimer(); say("Grid cleared — fresh start.","");
+      buildBoard(); paintSelection(); startTimer(); tickTimer(); say("Grid cleared — fresh start.","");
     });
     document.getElementById("btnBack").addEventListener("click", closePuzzle);
     document.getElementById("btnBack2").addEventListener("click", closePuzzle);
@@ -774,6 +787,7 @@
     themeToggle.addEventListener("click", function(){
       var dark=document.documentElement.getAttribute("data-theme")==="dark";
       document.documentElement.setAttribute("data-theme", dark?"light":"dark");
+      try{ window.localStorage.setItem("capm-crosswords-theme", dark?"light":"dark"); }catch(e){}
       syncThemeToggle();
     });
     syncThemeToggle();
@@ -781,7 +795,11 @@
     /* ---------- PWA: offline worker + install ---------- */
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", function () {
-        navigator.serviceWorker.register("sw.js").catch(function () { /* page still works fully online */ });
+        navigator.serviceWorker.register("sw.js").then(function (reg) {
+          console.info("CAPM Crosswords: service worker registered (scope " + reg.scope + ").");
+        }).catch(function (err) {
+          console.warn("CAPM Crosswords: service worker registration failed — offline mode unavailable.", err);
+        });
       });
     }
     var installBtn = document.getElementById("installBtn");
