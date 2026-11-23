@@ -1,0 +1,826 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="description" content="Fifteen crosswords built from the CAPM exam content outline — 120 terms across every exam domain, with timer, check and reveal tools." />
+    <meta name="theme-color" id="themeColorMeta" content="#f4f1ea" />
+    <link rel="manifest" href="manifest.json" />
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="CAPM Crosswords" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <title>CAPM Crossword Puzzles</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,600;8..60,800&family=Public+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <script>
+      (function(){var dark=false;try{dark=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches;}catch(e){}document.documentElement.setAttribute("data-theme",dark?"dark":"light");var tc=document.getElementById("themeColorMeta");if(tc)tc.setAttribute("content",dark?"#12161d":"#f4f1ea");})();
+    </script>
+    <style>
+      :root{
+        --bg:#f4f1ea; --surface:#fffdf8; --surface2:#ece7da; --ink:#1c2430; --ink2:#4c5563;
+        --line:#d8d2c2; --accent:#0e5a4d; --accent-ink:#ffffff; --gold:#b07d1e; --gold-soft:#f3e5c3;
+        --good:#177245; --good-bg:#dff2e4; --bad:#b3261e; --bad-bg:#fbe3e1;
+        --cell:#ffffff; --cell-block:#232a35; --cell-active:#fdeec9; --cell-word:#e8f2ee; --cell-num:#6b7280;
+        --shadow:0 10px 28px rgba(28,36,48,.10);
+      }
+      :root[data-theme="dark"]{
+        --bg:#12161d; --surface:#1a202a; --surface2:#232b37; --ink:#eef1f5; --ink2:#a9b3c0;
+        --line:#333d4c; --accent:#2ea88f; --accent-ink:#08130f; --gold:#d9a83f; --gold-soft:#3a2f14;
+        --good:#4cc38a; --good-bg:#173527; --bad:#ff8a80; --bad-bg:#3d1d1a;
+        --cell:#202834; --cell-block:#05070a; --cell-active:#4a3a12; --cell-word:#173a31; --cell-num:#8b96a5;
+        --shadow:0 10px 28px rgba(0,0,0,.45);
+      }
+      *{box-sizing:border-box}
+      html{-webkit-text-size-adjust:100%}
+      body{margin:0;background:var(--bg);color:var(--ink);font-family:"Public Sans",system-ui,-apple-system,"Segoe UI",sans-serif;line-height:1.45}
+      button,[role="button"],select,summary,input:not([type="checkbox"],[type="radio"]){min-height:2rem}
+      .wrap{max-width:1060px;margin:0 auto;padding:20px 16px 56px}
+      h1,h2,h3{font-family:"Source Serif 4",Georgia,serif;margin:0}
+      /* ---------- theme toggle ---------- */
+      .topbar{display:flex;justify-content:flex-end;padding:2px 0 0}
+      .theme-toggle{display:inline-flex;align-items:center;gap:8px;appearance:none;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:99px;padding:8px 14px;font:inherit;font-size:13px;font-weight:700;cursor:pointer;min-height:40px}
+      .theme-toggle:hover{border-color:var(--accent)}
+      .theme-toggle:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+      .theme-toggle svg{width:16px;height:16px;flex:none}
+      /* ---------- install (PWA) ---------- */
+      .topbar{gap:8px;flex-wrap:wrap}
+      .install-btn{display:inline-flex;align-items:center;gap:8px;appearance:none;border:1px solid var(--accent);background:var(--accent);color:var(--accent-ink);border-radius:99px;padding:8px 14px;font:inherit;font-size:13px;font-weight:700;cursor:pointer;min-height:40px}
+      .install-btn:hover{filter:brightness(1.08)}
+      .install-btn:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+      .install-btn svg{width:16px;height:16px;flex:none}
+      .install-note{font-size:13px;color:var(--ink2);align-self:center}
+      /* installed app: respect the notch / home-indicator safe areas */
+      @media (display-mode: standalone){
+        .wrap{padding-top:calc(20px + env(safe-area-inset-top, 0px));padding-bottom:calc(56px + env(safe-area-inset-bottom, 0px))}
+      }
+      /* ---------- header ---------- */
+      .masthead{padding:10px 0 4px}
+      .masthead h1{font-size:clamp(30px,5.4vw,46px);font-weight:800;letter-spacing:-.01em;line-height:1.08}
+      .masthead h1 .thin{color:var(--accent)}
+      .lede{color:var(--ink2);font-size:16px;max-width:62ch;margin:10px 0 0}
+      .packbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:18px 0 4px}
+      .packbar .stat{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:8px 14px;font-size:14px;font-weight:600}
+      .packbar .stat b{color:var(--accent);font-size:16px}
+      .bar{height:8px;background:var(--surface2);border-radius:99px;overflow:hidden;flex:1 1 180px;min-width:140px}
+      .bar i{display:block;height:100%;background:var(--gold);width:0%;transition:width .4s ease}
+      /* ---------- pack grid ---------- */
+      .pack{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;margin-top:18px}
+      .pcard{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;text-align:left;cursor:pointer;font:inherit;color:inherit;width:100%;box-shadow:none;transition:border-color .15s,transform .15s}
+      .pcard:hover{border-color:var(--accent)}
+      .pcard:focus-visible,.btn:focus-visible,.clue li:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+      .pcard .domain{font-size:12px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--gold)}
+      .pcard h3{font-size:21px;margin:6px 0 6px;line-height:1.2}
+      .pcard p{margin:0;color:var(--ink2);font-size:14px}
+      .pcard .meta{display:flex;gap:14px;margin-top:12px;font-size:13px;font-weight:600;color:var(--ink2)}
+      .pcard .status{margin-left:auto;font-weight:800}
+      .pcard .status.done{color:var(--good)}
+      .pcard .status.mid{color:var(--gold)}
+      /* ---------- play view ---------- */
+      .hidden{display:none!important}
+      .playhead{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;justify-content:space-between;margin-top:6px}
+      .playhead h2{font-size:clamp(24px,4vw,32px);line-height:1.15}
+      .playhead .domain{font-size:12px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--gold)}
+      .hud{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+      .hud .chip{background:var(--surface);border:1px solid var(--line);border-radius:99px;padding:6px 12px;font-size:13px;font-weight:700;font-variant-numeric:tabular-nums}
+      .toolbar{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}
+      .btn{appearance:none;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:10px;padding:10px 16px;font:inherit;font-size:14px;font-weight:700;cursor:pointer;min-height:44px}
+      .btn:hover{border-color:var(--accent)}
+      .btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+      .btn.gold{background:var(--gold);border-color:var(--gold);color:#fff}
+      :root[data-theme="dark"] .btn.gold{color:#191204}
+      .layout{display:grid;grid-template-columns:minmax(0,560px) minmax(0,1fr);gap:22px;align-items:start}
+      @media (max-width:820px){.layout{grid-template-columns:1fr}}
+      .boardbox{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px;box-shadow:var(--shadow)}
+      .board{display:grid;gap:1.5px;background:var(--cell-block);border:2px solid var(--cell-block);border-radius:6px;overflow:hidden;user-select:none}
+      .cell{position:relative;background:var(--cell);aspect-ratio:1/1}
+      .cell.block{background:var(--cell-block)}
+      .cell .num{position:absolute;top:1px;left:2.5px;font-size:clamp(7px,1.6vw,10px);font-weight:700;color:var(--cell-num);pointer-events:none;line-height:1;z-index:2}
+      .cell input{position:absolute;inset:0;width:100%;height:100%;border:0;background:transparent;text-align:center;font:inherit;font-weight:700;text-transform:uppercase;color:var(--ink);padding:0;caret-color:var(--accent);border-radius:0;font-size:clamp(11px,3.4vw,20px)}
+      .cell input:focus{outline:none}
+      .cell.inword{background:var(--cell-word)}
+      .cell.active{background:var(--cell-active)}
+      .cell.correct input{color:var(--good)}
+      .cell.correct{background:var(--good-bg)}
+      .cell.wrong input{color:var(--bad)}
+      .cell.wrong{background:var(--bad-bg)}
+      .cell.revealed input{color:var(--gold)}
+      .activeclue{margin-top:12px;background:var(--gold-soft);border-radius:10px;padding:12px 14px;font-size:15px;min-height:52px}
+      .activeclue b{color:var(--gold);margin-right:6px}
+      .clues{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+      @media (max-width:520px){.clues{grid-template-columns:1fr}}
+      .clues h3{font-size:17px;margin:0 0 8px;padding-bottom:6px;border-bottom:2px solid var(--gold)}
+      .clue{list-style:none;margin:0;padding:0}
+      .clue li{padding:8px 8px;border-radius:8px;font-size:14px;cursor:pointer;min-height:36px}
+      .clue li:hover{background:var(--surface2)}
+      .clue li.sel{background:var(--gold-soft)}
+      .clue li.done{color:var(--ink2);text-decoration:line-through;text-decoration-thickness:1px}
+      .clue li b{margin-right:6px;font-variant-numeric:tabular-nums}
+      .winbox{margin-top:16px;background:var(--good-bg);border:1px solid var(--good);border-radius:14px;padding:18px}
+      .winbox h3{font-size:22px;margin-bottom:6px}
+      .winbox p{margin:0 0 12px;color:var(--ink)}
+      .msg{font-size:14px;font-weight:600;min-height:20px;margin-top:8px}
+      .msg.err{color:var(--bad)} .msg.ok{color:var(--good)}
+      .foot{margin-top:34px;color:var(--ink2);font-size:13px;border-top:1px solid var(--line);padding-top:14px}
+      @media (prefers-reduced-motion: reduce){*{transition:none!important}}
+    </style>
+  </head>
+  <body>
+    <main class="wrap">
+      <div class="topbar">
+        <span class="install-note hidden" id="installNote"></span>
+        <button class="install-btn hidden" id="installBtn" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          <span>Install app</span>
+        </button>
+        <button class="theme-toggle" id="themeToggle" type="button" aria-pressed="false" aria-label="Toggle dark mode">
+          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          <svg class="icon-sun hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+          <span class="theme-label">Dark mode</span>
+        </button>
+      </div>
+      <!-- ======= PACK VIEW ======= -->
+      <section id="packView">
+        <div class="masthead">
+          <h1>CAPM Crosswords — <span class="thin">study the grid, pass the exam</span></h1>
+          <p class="lede">Fifteen crosswords built from the CAPM exam content outline. Each puzzle drills one exam domain or cross-cutting topic: the vocabulary, formulas, and frameworks PMI loves to test. Fill the grid, check your work, and finish the pack.</p>
+        </div>
+        <div class="packbar">
+          <span class="stat"><b id="doneCount">0</b> of 15 puzzles solved</span>
+          <div class="bar" aria-hidden="true"><i id="packBar"></i></div>
+          <span class="stat"><b id="wordCount">0</b> CAPM terms in the pack</span>
+        </div>
+        <div class="pack" id="packGrid"></div>
+        <p class="foot">Clues follow the PMI CAPM Exam Content Outline and PMBOK® Guide terminology. Progress is kept for this session — close the page and the grids reset. PMBOK and CAPM are registered marks of the Project Management Institute, Inc. This is an independent study aid, not affiliated with PMI.</p>
+      </section>
+
+      <!-- ======= PLAY VIEW ======= -->
+      <section id="playView" class="hidden">
+        <div class="playhead">
+          <div>
+            <div class="domain" id="pDomain"></div>
+            <h2 id="pTitle"></h2>
+          </div>
+          <div class="hud">
+            <span class="chip" id="hudProgress">0% filled</span>
+            <span class="chip" id="hudTimer">00:00</span>
+          </div>
+        </div>
+        <div class="toolbar">
+          <button class="btn" id="btnBack" type="button">← All puzzles</button>
+          <button class="btn primary" id="btnCheck" type="button">Check puzzle</button>
+          <button class="btn" id="btnCheckWord" type="button">Check word</button>
+          <button class="btn" id="btnRevealLetter" type="button">Reveal letter</button>
+          <button class="btn" id="btnRevealWord" type="button">Reveal word</button>
+          <button class="btn" id="btnClear" type="button">Clear grid</button>
+        </div>
+        <div class="layout">
+          <div>
+            <div class="boardbox">
+              <div class="board" id="board" role="grid" aria-label="Crossword grid"></div>
+              <div class="activeclue" id="activeClue">Tap a square to start.</div>
+            </div>
+            <div class="msg" id="msg" aria-live="polite"></div>
+            <div class="winbox hidden" id="winBox">
+              <h3>Puzzle solved 🎉</h3>
+              <p id="winStats"></p>
+              <button class="btn gold" id="btnNext" type="button">Next puzzle →</button>
+              <button class="btn" id="btnBack2" type="button">Back to pack</button>
+            </div>
+          </div>
+          <div class="clues">
+            <div>
+              <h3>Across</h3>
+              <ol class="clue" id="cluesAcross"></ol>
+            </div>
+            <div>
+              <h3>Down</h3>
+              <ol class="clue" id="cluesDown"></ol>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script>
+    "use strict";
+    /* Each entry: [ANSWER, row, col, "A"|"D", "clue"] — grids verified to interlock. */
+    var PUZZLES = [
+      {
+        id:"fundamentals", domain:"Domain 1 · Fundamentals & Core Concepts",
+        title:"Project Management Fundamentals",
+        blurb:"Charter, sponsor, scope, baselines — the core vocabulary every CAPM question builds on.",
+        rows:14, cols:14,
+        words:[
+          ["DELIVERABLE",0,12,"D","Any unique, verifiable product, result, or capability produced to complete a process, phase, or project"],
+          ["SCOPE",1,8,"A","The work performed to deliver a product with the specified features and functions"],
+          ["BASELINE",4,5,"D","The approved version of a plan, used as the starting point against which performance is measured"],
+          ["CONSTRAINT",4,9,"D","A limiting factor on the project — time, cost, and scope form the famous triple one"],
+          ["LIFECYCLE",5,0,"D","The series of phases a project passes through from its start to its completion"],
+          ["STAKEHOLDER",5,3,"A","Anyone who can affect, be affected by, or perceive themselves to be affected by the project"],
+          ["SPONSOR",5,3,"D","The person who provides resources and support for the project and champions it"],
+          ["CHARTER",11,0,"A","The document that formally authorizes the project and names the project manager"],
+          ["MILESTONE",13,4,"A","A significant point or event in the project — it has zero duration"]
+        ]
+      },
+      {
+        id:"predictive", domain:"Domain 2 · Predictive, Plan-Based Methods",
+        title:"Predictive & Plan-Based",
+        blurb:"Waterfall thinking: sequential phases, phase gates, baselines, and formal change control.",
+        rows:11, cols:13,
+        words:[
+          ["WATERFALL",0,4,"D","The traditional sequential approach where each phase must complete before the next begins"],
+          ["FREEZE",1,7,"D","The point where scope or requirements are locked and further changes need formal approval"],
+          ["PHASE",1,11,"D","A collection of logically related activities that culminates in one or more deliverables"],
+          ["SEQUENTIAL",3,3,"A","How plan-driven phases are arranged — one after another, in a set order"],
+          ["CHANGE",6,2,"A","In predictive work, this kind of request must pass through formal integrated control before it is approved"],
+          ["GANTT",6,6,"D","The bar chart that displays schedule activities against time"],
+          ["BASELINE",8,0,"A","The approved scope, schedule, or cost plan that actual performance is compared against"],
+          ["GATE",10,4,"A","The phase-end review where a decision is made to continue, change, or stop the project"]
+        ]
+      },
+      {
+        id:"agile", domain:"Domain 3 · Agile Frameworks",
+        title:"Agile Frameworks",
+        blurb:"Scrum events, Kanban flow, backlogs and increments — the adaptive half of the exam.",
+        rows:16, cols:13,
+        words:[
+          ["INCREMENT",0,2,"D","The usable, potentially releasable piece of the product delivered at the end of a sprint"],
+          ["BACKLOG",6,8,"D","The prioritized list of everything the product might need — the product ___"],
+          ["RETROSPECTIVE",8,0,"A","The Scrum event where the team inspects how the sprint went and plans improvements"],
+          ["SCRUM",8,5,"D","The most widely used agile framework, built on sprints with defined roles and events"],
+          ["VELOCITY",8,11,"D","A measure of the amount of work a team completes in a sprint"],
+          ["KANBAN",10,2,"D","The visual board method that limits work in progress to improve flow"],
+          ["STANDUP",11,0,"A","The short daily meeting where the team syncs on progress and blockers"],
+          ["SPRINT",14,6,"A","A fixed-length timebox of one to four weeks in which a usable increment is created"]
+        ]
+      },
+      {
+        id:"business-analysis", domain:"Domain 4 · Business Analysis Frameworks",
+        title:"Business Analysis",
+        blurb:"Elicitation, requirements, traceability, and acceptance — at 27% of the exam, the second-largest domain.",
+        rows:12, cols:16,
+        words:[
+          ["VALIDATION",0,6,"D","Confirming the delivered solution actually meets the business need it was built for"],
+          ["STAKEHOLDER",1,4,"A","Business analysis starts by identifying these people and understanding their needs"],
+          ["REQUIREMENTS",3,2,"A","Conditions or capabilities needed by stakeholders to solve a problem or achieve an objective"],
+          ["USECASE",5,4,"D","A description of how a user interacts with a system to achieve a goal (two words, no space)"],
+          ["ACCEPTANCE",5,6,"A","The criteria a deliverable must meet before the customer will sign off on it"],
+          ["ELICITATION",7,4,"A","Drawing out requirements through interviews, workshops, observation, and document analysis"],
+          ["TRACEABILITY",11,0,"A","Tracking each requirement from its origin through to delivery, often in a dedicated matrix"]
+        ]
+      },
+      {
+        id:"risk", domain:"Cross-Cutting · Risk & Issues",
+        title:"Risk, Threats & Issues",
+        blurb:"Risk registers, response strategies, and the difference between a risk and an issue.",
+        rows:12, cols:13,
+        words:[
+          ["REGISTER",0,4,"A","The document where identified risks are recorded, analyzed, and tracked — the risk ___"],
+          ["THREAT",0,9,"D","A negative risk: an uncertain event that would harm project objectives if it occurred"],
+          ["PROBABILITY",1,3,"D","How likely a risk is to occur — paired with impact to prioritize the risk list"],
+          ["CONTINGENCY",3,2,"A","The reserve (or plan) set aside specifically for identified risks"],
+          ["MITIGATE",4,0,"D","The risk response strategy that works to reduce a threat's probability or impact"],
+          ["IMPACT",5,0,"A","The effect a risk would have on project objectives if it actually occurred"],
+          ["ISSUE",7,3,"A","A problem that is happening right now — unlike a risk, there is nothing uncertain about it"],
+          ["RISK",9,2,"A","An uncertain event or condition that, if it occurs, affects at least one project objective"]
+        ]
+      },
+      {
+        id:"earned-value", domain:"Cross-Cutting · Schedule, Cost & Earned Value",
+        title:"Earned Value & Control",
+        blurb:"EV, PV, AC, variances, indexes, and forecasts — the math-heavy corner of the CAPM.",
+        rows:12, cols:11,
+        words:[
+          ["BUDGET",0,0,"D","The approved estimate of all costs needed to complete the project"],
+          ["INDEX",1,4,"D","CPI and SPI are each this kind of ratio, comparing earned value against actuals or plan"],
+          ["SCHEDULE",1,10,"D","One of the three baselines; its variance is calculated as EV minus PV"],
+          ["EARNEDVALUE",4,0,"A","The measure of work actually performed, expressed in budget terms — EV for short (two words, no space)"],
+          ["VARIANCE",4,6,"D","The difference between planned and actual performance, such as CV = EV − AC"],
+          ["COST",7,2,"D","CV = EV − AC measures this kind of variance"],
+          ["FORECAST",8,1,"A","An estimate of future project performance, such as the estimate at completion (EAC)"],
+          ["BASELINE",11,3,"A","The approved plan that planned value (PV) is measured against over time"]
+        ]
+      },
+      {
+        id:"stakeholders", domain:"Cross-Cutting · Stakeholders & Communications",
+        title:"Stakeholders & Communications",
+        blurb:"Power, interest, salience, and engagement — knowing who matters to the project and keeping them involved.",
+        rows:13, cols:14,
+        words:[
+          ["FEEDBACK",0,3,"A","Information returned about reactions to a product, service, or someone's performance"],
+          ["CONFLICT",0,0,"D","A disagreement between stakeholders or team members that the project manager must help resolve"],
+          ["STAKEHOLDER",1,1,"A","Anyone who can affect, be affected by, or perceive themselves to be affected by the project"],
+          ["SALIENCE",1,1,"D","The model that classifies stakeholders by their power, legitimacy, and urgency"],
+          ["ENGAGEMENT",1,5,"D","Keeping stakeholders involved, informed, and committed throughout the project"],
+          ["INFLUENCE",3,12,"D","A stakeholder's ability to affect project decisions, direction, and outcomes"],
+          ["REGISTER",8,6,"A","The document that lists stakeholders along with their interest and influence — the stakeholder ___"],
+          ["POWER",11,2,"A","A stakeholder's capacity to impose their will on the project — one axis of the power/interest grid"]
+        ]
+      },
+      {
+        id:"scope", domain:"Cross-Cutting · Scope Management",
+        title:"Scope Management",
+        blurb:"Statements, exclusions, the WBS, and the eternal fight against scope creep and gold plating.",
+        rows:13, cols:14,
+        words:[
+          ["CREEP",0,8,"A","The uncontrolled expansion of scope without adjustments to time, cost, or resources — scope ___"],
+          ["SCOPE",1,2,"A","All the work — and only the work — required to complete the project successfully"],
+          ["STATEMENT",1,2,"D","The detailed description of the project and product scope — the scope ___"],
+          ["EXCLUSIONS",1,6,"D","Work that is specifically out of scope, spelled out in the scope statement to prevent misunderstandings"],
+          ["ACCEPTANCE",2,13,"D","The criteria a deliverable must meet before the customer will formally sign off on it"],
+          ["WBS",5,8,"A","The deliverable-oriented breakdown of all project work into smaller, manageable pieces (initials)"],
+          ["GOLDPLATING",11,2,"A","Adding extra features beyond the agreed scope without being asked — a scope control no-no"],
+          ["VALIDATE",12,3,"A","The process of formal acceptance of completed deliverables by the customer or sponsor — ___ scope"]
+        ]
+      },
+      {
+        id:"quality", domain:"Cross-Cutting · Quality Management",
+        title:"Quality Management",
+        blurb:"Audits, inspections, standards, and prevention — building quality in rather than inspecting it in.",
+        rows:13, cols:14,
+        words:[
+          ["CHECKLIST",0,1,"A","A structured tool listing steps or items to verify, used to check quality consistently"],
+          ["PREVENTION",0,12,"D","Keeping errors out of the process in the first place — preferred over inspection"],
+          ["QUALITY",2,2,"A","The degree to which a set of inherent characteristics fulfills requirements"],
+          ["AUDIT",2,4,"D","A structured review to determine whether project activities comply with policies, processes, and procedures"],
+          ["STANDARD",4,10,"D","A document of guidelines or characteristics that activities and results should conform to"],
+          ["INSPECTION",7,1,"A","Examining a work product to determine whether it conforms to documented standards"],
+          ["BENCHMARK",9,1,"A","Comparing actual or planned practices against those of comparable organizations to identify best practices"],
+          ["TESTING",11,3,"A","Evaluating a product through planned trials to find defects before delivery"]
+        ]
+      },
+      {
+        id:"resources", domain:"Cross-Cutting · Resources & Team Leadership",
+        title:"Resources & Team Leadership",
+        blurb:"RAM charts, availability, motivation, and negotiation — leading the people who do the work.",
+        rows:14, cols:14,
+        words:[
+          ["RESOURCE",1,1,"A","Team members, equipment, materials, and facilities needed to complete the project work"],
+          ["RAM",1,1,"D","The matrix that maps work packages to the people responsible for them (initials)"],
+          ["AVAILABILITY",2,0,"D","Whether a resource is actually free and able to work when the schedule needs them"],
+          ["LEADERSHIP",4,2,"A","Inspiring and guiding the team toward the project vision, rather than just managing tasks"],
+          ["TRAINING",4,13,"D","Developing team members' knowledge and skills so they can perform their project roles"],
+          ["MOTIVATION",6,1,"A","What drives team members to perform — Herzberg and Maslow are tested favorites on this"],
+          ["NEGOTIATION",8,2,"A","How the project manager secures resources and resolves competing demands with functional managers"],
+          ["TEAMWORK",11,3,"A","Cooperative effort by the group toward a common goal — built through team development stages"]
+        ]
+      },
+      {
+        id:"integration", domain:"Cross-Cutting · Integration & Governance",
+        title:"Integration & Governance",
+        blurb:"Pulling all the pieces together: decisions, monitoring, lessons learned, and closing properly.",
+        rows:14, cols:14,
+        words:[
+          ["APPROVAL",0,12,"D","Formal sign-off that authorizes work, a deliverable, or a change to proceed"],
+          ["INTEGRATION",2,0,"A","The coordination of all project elements — processes, plans, and changes — into a unified whole"],
+          ["GOVERNANCE",2,4,"D","The framework of authority, decision-making, and oversight that guides the project"],
+          ["MONITORING",4,0,"D","Collecting and measuring performance data to compare actual progress against the plan"],
+          ["DECISION",4,6,"A","A conclusion reached after consideration — governance defines who gets to make each one"],
+          ["CHANGE",6,6,"A","A formal proposal to modify a document, deliverable, or baseline — it goes through integrated control"],
+          ["LESSONS",10,6,"A","Knowledge gained during the project, documented so future projects can benefit — ___ learned"],
+          ["CLOSURE",12,3,"A","Finalizing all activities, handing over the product, and releasing resources at the end — project ___"]
+        ]
+      },
+      {
+        id:"procurement", domain:"Cross-Cutting · Procurement & Contracts",
+        title:"Procurement & Contracts",
+        blurb:"Vendors, bids, fixed-price deals, and agreements — buying what the project needs from outside.",
+        rows:13, cols:15,
+        words:[
+          ["PROCUREMENT",1,1,"A","Obtaining goods and services from outside the project team or organization"],
+          ["CONTRACT",1,4,"D","A mutually binding agreement that obligates the seller to provide something of value to the buyer"],
+          ["PURCHASE",3,13,"D","A ___ order is a commercial document used to buy products or services from a seller"],
+          ["VENDOR",4,6,"A","An external seller that provides products, services, or results to the project"],
+          ["FIXEDPRICE",9,1,"A","A contract type where the fee is set in advance and doesn't change with the seller's costs (two words, no space)"],
+          ["BIDDER",10,3,"A","A seller competing for the work — they attend a ___ conference to ask questions before proposals are due"],
+          ["SOW",11,6,"A","The narrative description of the work to be procured (initials)"],
+          ["AGREEMENT",12,2,"A","A documented arrangement between buyer and seller defining obligations for both parties"]
+        ]
+      },
+      {
+        id:"schedule-tools", domain:"Cross-Cutting · Schedule Tools & Techniques",
+        title:"Schedule Tools & Techniques",
+        blurb:"Critical path, float, leads and lags, and dependencies — the mechanics behind the project timeline.",
+        rows:14, cols:14,
+        words:[
+          ["DURATION",0,3,"A","The total number of work periods required to complete an activity"],
+          ["CRITICALPATH",1,0,"A","The sequence of activities that determines the shortest possible project duration (two words, no space)"],
+          ["DEPENDENCY",3,12,"D","A relationship between two activities where one relies on the other to start or finish"],
+          ["FLOAT",4,2,"A","The amount of time an activity can be delayed without delaying the project finish date"],
+          ["NETWORK",6,1,"A","The diagram that shows activities and their logical relationships — the schedule ___ diagram"],
+          ["PREDECESSOR",8,1,"A","An activity that must start or finish before another activity can proceed"],
+          ["LAG",10,4,"A","A delay between a predecessor finishing and its successor starting"],
+          ["LEAD",10,4,"D","An acceleration that lets a successor start before its predecessor has finished"]
+        ]
+      },
+      {
+        id:"cost", domain:"Cross-Cutting · Cost & Budget Control",
+        title:"Cost & Budget Control",
+        blurb:"Estimating techniques, reserves, and funding — how the budget is built and defended.",
+        rows:13, cols:14,
+        words:[
+          ["ESTIMATE",1,2,"A","A quantitative assessment of the likely cost of the resources needed to complete the work"],
+          ["ANALOGOUS",1,7,"D","The estimating technique that uses actual costs from a previous, similar project as the basis"],
+          ["SUNK",3,10,"A","Costs that have already been incurred and cannot be recovered — ___ costs, ignored in decisions"],
+          ["FUNDING",6,13,"D","Money provided for the project, often released in increments aligned to milestones"],
+          ["EXPENSES",9,2,"A","Costs incurred in carrying out the project work, tracked against the budget"],
+          ["PARAMETRIC",10,1,"A","Estimating that uses a statistical relationship between historical data and other variables, like cost per square foot"],
+          ["BUDGETING",11,2,"A","Aggregating the estimated costs of activities and work packages to establish the cost baseline"],
+          ["RESERVE",12,4,"A","Provision in the plan for cost or schedule overruns — contingency and management are the two kinds"]
+        ]
+      },
+      {
+        id:"ethics-tailoring", domain:"Cross-Cutting · Ethics, Tailoring & Responsibility",
+        title:"Ethics, Tailoring & Responsibility",
+        blurb:"Honesty, fairness, adapting your approach to the project — and acting like a professional throughout.",
+        rows:13, cols:14,
+        words:[
+          ["CULTURAL",0,13,"D","Awareness of and sensitivity to differences in values and practices — ___ awareness is a PMI expectation"],
+          ["ETHICS",1,2,"A","The moral principles that guide professional behavior — PMI has a Code of ___ and Professional Conduct"],
+          ["RESPECT",3,1,"A","One of the four values in PMI's Code of Ethics, alongside responsibility, fairness, and honesty"],
+          ["MENTORING",4,0,"D","Guiding and developing less experienced practitioners — part of professional responsibility"],
+          ["TAILORING",5,1,"A","Carefully selecting and adjusting processes, methods, and artifacts to fit the specific project"],
+          ["OWNERSHIP",7,2,"A","Taking responsibility for your decisions and actions as a project practitioner"],
+          ["TRANSPARENCY",9,1,"A","Being open and clear in communications and decision-making — no hidden agendas"],
+          ["INTEGRITY",10,0,"A","Consistently acting honestly and ethically, even when no one is watching"]
+        ]
+      }
+    ];
+
+    /* ---------- derived structures ---------- */
+    PUZZLES.forEach(function(p){
+      p.solution = {};   // "r,c" -> letter
+      p.cellWords = {};  // "r,c" -> [wordIdx...]
+      p.words.forEach(function(w, wi){
+        var ans=w[0], r=w[1], c=w[2], d=w[3];
+        for (var i=0;i<ans.length;i++){
+          var rr = d==="D" ? r+i : r, cc = d==="A" ? c+i : c, k = rr+","+cc;
+          p.solution[k]=ans[i];
+          (p.cellWords[k] = p.cellWords[k]||[]).push(wi);
+        }
+      });
+      // numbering: scan row-major, number any cell that starts a word
+      p.numbers = {}; p.wordNum = [];
+      var n=0;
+      for (var r2=0;r2<p.rows;r2++) for (var c2=0;c2<p.cols;c2++){
+        var starts = p.words.filter(function(w){return w[1]===r2 && w[2]===c2;});
+        if (starts.length){ n++; p.numbers[r2+","+c2]=n; }
+      }
+      p.words.forEach(function(w){ p.wordNum.push(p.numbers[w[1]+","+w[2]]); });
+      p.state = { entries:{}, correct:{}, revealed:{}, checks:0, solved:false, seconds:0 };
+    });
+
+    var totalWords = PUZZLES.reduce(function(s,p){return s+p.words.length;},0);
+    document.getElementById("wordCount").textContent = totalWords;
+
+    /* ---------- pack view ---------- */
+    var packGrid = document.getElementById("packGrid");
+    function renderPack(){
+      packGrid.innerHTML="";
+      var done=0;
+      PUZZLES.forEach(function(p, idx){
+        var st=p.state;
+        var filledSet = {};
+        Object.keys(st.entries).forEach(function(k){ if(st.entries[k]) filledSet[k]=1; });
+        Object.keys(st.correct).forEach(function(k){ filledSet[k]=1; });
+        Object.keys(st.revealed).forEach(function(k){ filledSet[k]=1; });
+        var filled = Object.keys(filledSet).length;
+        var total = Object.keys(p.solution).length;
+        var pct = Math.round(100*filled/total);
+        if (st.solved) done++;
+        var card=document.createElement("button");
+        card.type="button"; card.className="pcard";
+        var status = st.solved ? '<span class="status done">✓ Solved</span>'
+                   : pct>0 ? '<span class="status mid">'+pct+'% filled</span>'
+                   : '<span class="status">Not started</span>';
+        card.innerHTML = '<div class="domain">'+p.domain+'</div><h3>'+p.title+'</h3><p>'+p.blurb+'</p>'+
+          '<div class="meta"><span>'+p.words.length+' words</span><span>'+p.rows+' × '+p.cols+' grid</span>'+status+'</div>';
+        card.addEventListener("click", function(){ openPuzzle(idx); });
+        packGrid.appendChild(card);
+      });
+      document.getElementById("doneCount").textContent = done;
+      document.getElementById("packBar").style.width = (100*done/PUZZLES.length)+"%";
+    }
+
+    /* ---------- play view ---------- */
+    var cur=null, curIdx=-1, sel={r:0,c:0,dir:"A",word:-1}, timerId=null;
+    var boardEl=document.getElementById("board"), msgEl=document.getElementById("msg");
+
+    function key(r,c){ return r+","+c; }
+    function wordCells(p, wi){
+      var w=p.words[wi], out=[];
+      for (var i=0;i<w[0].length;i++) out.push(w[3]==="A" ? [w[1], w[2]+i] : [w[1]+i, w[2]]);
+      return out;
+    }
+    function say(text, cls){ msgEl.textContent=text||""; msgEl.className="msg "+(cls||""); }
+
+    function openPuzzle(idx){
+      saveTimer();
+      curIdx=idx; cur=PUZZLES[idx];
+      document.getElementById("packView").classList.add("hidden");
+      document.getElementById("playView").classList.remove("hidden");
+      document.getElementById("winBox").classList.add("hidden");
+      document.getElementById("pDomain").textContent=cur.domain;
+      document.getElementById("pTitle").textContent=cur.title;
+      say("");
+      buildBoard(); buildClues();
+      // select first across word start
+      var first = cur.words.map(function(w,i){return i;}).sort(function(a,b){return cur.wordNum[a]-cur.wordNum[b];})[0];
+      selectWord(first, true);
+      startTimer();
+      window.scrollTo({top:0});
+    }
+    function closePuzzle(){
+      saveTimer();
+      document.getElementById("playView").classList.add("hidden");
+      document.getElementById("packView").classList.remove("hidden");
+      renderPack(); window.scrollTo({top:0});
+    }
+    function startTimer(){
+      clearInterval(timerId);
+      timerId=setInterval(function(){
+        if (cur && !cur.state.solved){ cur.state.seconds++; tickTimer(); }
+      },1000);
+      tickTimer();
+    }
+    function saveTimer(){ clearInterval(timerId); timerId=null; }
+    function tickTimer(){
+      if(!cur) return;
+      var s=cur.state.seconds, m=Math.floor(s/60), ss=s%60;
+      document.getElementById("hudTimer").textContent=(m<10?"0":"")+m+":"+(ss<10?"0":"")+ss;
+    }
+
+    function buildBoard(){
+      boardEl.innerHTML="";
+      boardEl.style.gridTemplateColumns="repeat("+cur.cols+", 1fr)";
+      for (var r=0;r<cur.rows;r++){
+        for (var c=0;c<cur.cols;c++){
+          var k=key(r,c), cell=document.createElement("div");
+          if (!(k in cur.solution)){ cell.className="cell block"; boardEl.appendChild(cell); continue; }
+          cell.className="cell"; cell.dataset.r=r; cell.dataset.c=c;
+          if (cur.numbers[k]){ var num=document.createElement("span"); num.className="num"; num.textContent=cur.numbers[k]; cell.appendChild(num); }
+          var inp=document.createElement("input");
+          inp.type="text"; inp.maxLength=1; inp.autocomplete="off"; inp.autocapitalize="characters";
+          inp.setAttribute("aria-label","Row "+(r+1)+" column "+(c+1));
+          inp.dataset.r=r; inp.dataset.c=c;
+          var st=cur.state;
+          if (st.correct[k] || st.revealed[k]){ inp.value=cur.solution[k]; }
+          else if (st.entries[k]){ inp.value=st.entries[k]; }
+          if (st.correct[k]) cell.classList.add("correct");
+          if (st.revealed[k]) cell.classList.add("revealed");
+          inp.addEventListener("click", onCellClick);
+          inp.addEventListener("input", onInput);
+          inp.addEventListener("keydown", onKeydown);
+          inp.addEventListener("focus", onFocus);
+          cell.appendChild(inp);
+          boardEl.appendChild(cell);
+        }
+      }
+      updateProgress();
+    }
+    function inputAt(r,c){ return boardEl.querySelector('input[data-r="'+r+'"][data-c="'+c+'"]'); }
+    function cellDiv(r,c){ var i=inputAt(r,c); return i ? i.parentElement : null; }
+
+    function onFocus(e){
+      var r=+e.target.dataset.r, c=+e.target.dataset.c;
+      if (sel.r===r && sel.c===c) return;
+      pickCell(r,c,false);
+    }
+    function onCellClick(e){
+      var r=+e.target.dataset.r, c=+e.target.dataset.c;
+      if (sel.r===r && sel.c===c){
+        // toggle direction if the cell is in both an across and a down word
+        var ws=cur.cellWords[key(r,c)]||[];
+        if (ws.length>1){
+          var other = ws.find(function(wi){ return cur.words[wi][3]!==sel.dir; });
+          if (other!==undefined) selectWord(other,true);
+        }
+        return;
+      }
+      pickCell(r,c,true);
+    }
+    function pickCell(r,c,focusIt){
+      var ws=cur.cellWords[key(r,c)]||[];
+      if (!ws.length) return;
+      var pref = ws.find(function(wi){ return cur.words[wi][3]===sel.dir; });
+      selectWord(pref!==undefined ? pref : ws[0], false);
+      sel.r=r; sel.c=c; paintSelection();
+      if (focusIt){ var i=inputAt(r,c); if(i) i.focus(); }
+    }
+    function selectWord(wi, focusFirst){
+      var w=cur.words[wi];
+      sel.word=wi; sel.dir=w[3]; sel.r=w[1]; sel.c=w[2];
+      paintSelection();
+      var ac=document.getElementById("activeClue");
+      ac.innerHTML="<b>"+cur.wordNum[wi]+" "+(w[3]==="A"?"Across":"Down")+"</b> "+w[4]+" <span style='opacity:.75'>("+w[0].length+" letters)</span>";
+      document.querySelectorAll(".clue li").forEach(function(li){ li.classList.toggle("sel", +li.dataset.wi===wi); });
+      if (focusFirst){ var i=inputAt(w[1],w[2]); if(i){ i.focus(); i.select(); } }
+    }
+    function paintSelection(){
+      boardEl.querySelectorAll(".cell").forEach(function(cd){ cd.classList.remove("inword","active"); });
+      if (sel.word<0) return;
+      wordCells(cur, sel.word).forEach(function(rc){
+        var d=cellDiv(rc[0],rc[1]); if(d) d.classList.add("inword");
+      });
+      var a=cellDiv(sel.r,sel.c); if(a) a.classList.add("active");
+      // mark completed words in clue list
+      document.querySelectorAll(".clue li").forEach(function(li){
+        var wi=+li.dataset.wi;
+        var doneAll = wordCells(cur,wi).every(function(rc){ var k=key(rc[0],rc[1]); return cur.state.correct[k]||cur.state.revealed[k]; });
+        li.classList.toggle("done", doneAll);
+      });
+    }
+    function onInput(e){
+      var r=+e.target.dataset.r, c=+e.target.dataset.c, k=key(r,c);
+      var v=e.target.value.toUpperCase().replace(/[^A-Z]/g,"");
+      e.target.value=v;
+      if (v){ cur.state.entries[k]=v; } else { delete cur.state.entries[k]; }
+      var cd=cellDiv(r,c); if(cd) cd.classList.remove("wrong");
+      if (v) move(1);
+      updateProgress();
+    }
+    function onKeydown(e){
+      var r=sel.r, c=sel.c;
+      if (e.key==="Backspace"){
+        e.preventDefault();
+        var k=key(r,c), inp=inputAt(r,c);
+        if (cur.state.correct[k]||cur.state.revealed[k]){ move(-1); return; }
+        if (inp && inp.value){ inp.value=""; delete cur.state.entries[k]; updateProgress(); }
+        else move(-1);
+      }
+      else if (e.key==="ArrowRight"){ e.preventDefault(); stepFree(r,c+1,"A"); }
+      else if (e.key==="ArrowLeft"){ e.preventDefault(); stepFree(r,c-1,"A"); }
+      else if (e.key==="ArrowDown"){ e.preventDefault(); stepFree(r+1,c,"D"); }
+      else if (e.key==="ArrowUp"){ e.preventDefault(); stepFree(r-1,c,"D"); }
+      else if (e.key===" "){ e.preventDefault(); onCellClick({target:inputAt(r,c)}); }
+    }
+    function stepFree(r,c,dir){
+      if (r<0||c<0||r>=cur.rows||c>=cur.cols) return;
+      if (!(key(r,c) in cur.solution)) return;
+      sel.dir=dir; pickCell(r,c,true);
+    }
+    function move(delta){
+      if (sel.word<0) return;
+      var cells=wordCells(cur, sel.word);
+      var i=cells.findIndex(function(rc){return rc[0]===sel.r && rc[1]===sel.c;});
+      var j=i+delta;
+      if (j<0||j>=cells.length) return;
+      sel.r=cells[j][0]; sel.c=cells[j][1];
+      paintSelection();
+      var inp=inputAt(sel.r,sel.c); if(inp){ inp.focus(); inp.select(); }
+    }
+    function updateProgress(){
+      var total=Object.keys(cur.solution).length, filled=0;
+      Object.keys(cur.solution).forEach(function(k){
+        if (cur.state.correct[k]||cur.state.revealed[k]||cur.state.entries[k]) filled++;
+      });
+      document.getElementById("hudProgress").textContent=Math.round(100*filled/total)+"% filled";
+    }
+
+    function buildClues(){
+      var across=document.getElementById("cluesAcross"), down=document.getElementById("cluesDown");
+      across.innerHTML=""; down.innerHTML="";
+      var order=cur.words.map(function(w,i){return i;}).sort(function(a,b){return cur.wordNum[a]-cur.wordNum[b];});
+      order.forEach(function(wi){
+        var w=cur.words[wi], li=document.createElement("li");
+        li.dataset.wi=wi; li.tabIndex=0;
+        li.innerHTML="<b>"+cur.wordNum[wi]+".</b>"+w[4];
+        li.addEventListener("click", function(){ selectWord(wi,true); });
+        li.addEventListener("keydown", function(e){ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); selectWord(wi,true);} });
+        (w[3]==="A"?across:down).appendChild(li);
+      });
+    }
+
+    /* ---------- checking & revealing ---------- */
+    function checkCells(cells, label){
+      var wrong=0, blank=0, newlyRight=0;
+      cells.forEach(function(rc){
+        var k=key(rc[0],rc[1]), cd=cellDiv(rc[0],rc[1]);
+        if (cur.state.correct[k]||cur.state.revealed[k]) return;
+        var v=cur.state.entries[k]||"";
+        if (!v){ blank++; return; }
+        if (v===cur.solution[k]){ cur.state.correct[k]=true; delete cur.state.entries[k]; if(cd){cd.classList.add("correct"); cd.classList.remove("wrong");} newlyRight++; }
+        else { wrong++; if(cd) cd.classList.add("wrong"); }
+      });
+      paintSelection(); updateProgress();
+      if (wrong) say(label+": "+wrong+" letter"+(wrong>1?"s are":" is")+" wrong (marked red)."+(newlyRight?" "+newlyRight+" locked in ✓":""), "err");
+      else if (blank) say(label+": everything filled in so far is right — "+blank+" square"+(blank>1?"s":"")+" still blank.", "ok");
+      else say(label+": all correct ✓", "ok");
+      maybeWin();
+    }
+    function maybeWin(){
+      var all=Object.keys(cur.solution).every(function(k){ return cur.state.correct[k]||cur.state.revealed[k]; });
+      if (all && !cur.state.solved){
+        cur.state.solved=true; saveTimer();
+        var s=cur.state.seconds, m=Math.floor(s/60), ss=s%60;
+        var rev=Object.keys(cur.state.revealed).length;
+        document.getElementById("winStats").textContent=
+          "Finished in "+m+":"+(ss<10?"0":"")+ss+" · "+cur.state.checks+" check"+(cur.state.checks===1?"":"es")+" used"+
+          (rev? " · "+rev+" letter"+(rev>1?"s":"")+" revealed":" · no letters revealed — clean solve!");
+        document.getElementById("winBox").classList.remove("hidden");
+        say("Puzzle complete ✓","ok");
+        document.getElementById("winBox").scrollIntoView({behavior:"smooth",block:"nearest"});
+      }
+    }
+    function reveal(cells){
+      cells.forEach(function(rc){
+        var k=key(rc[0],rc[1]);
+        if (cur.state.correct[k]||cur.state.revealed[k]) return;
+        cur.state.revealed[k]=true; delete cur.state.entries[k];
+        var inp=inputAt(rc[0],rc[1]); if(inp) inp.value=cur.solution[k];
+        var cd=cellDiv(rc[0],rc[1]); if(cd){ cd.classList.add("revealed"); cd.classList.remove("wrong"); }
+      });
+      paintSelection(); updateProgress(); maybeWin();
+    }
+
+    document.getElementById("btnCheck").addEventListener("click", function(){
+      cur.state.checks++;
+      var all=[]; Object.keys(cur.solution).forEach(function(k){ var p=k.split(","); all.push([+p[0],+p[1]]); });
+      checkCells(all,"Puzzle");
+    });
+    document.getElementById("btnCheckWord").addEventListener("click", function(){
+      if (sel.word<0) return; cur.state.checks++;
+      checkCells(wordCells(cur,sel.word), cur.wordNum[sel.word]+" "+(sel.dir==="A"?"Across":"Down"));
+    });
+    document.getElementById("btnRevealLetter").addEventListener("click", function(){ reveal([[sel.r,sel.c]]); say("Letter revealed.",""); });
+    document.getElementById("btnRevealWord").addEventListener("click", function(){ if(sel.word>=0){ reveal(wordCells(cur,sel.word)); say("Word revealed.",""); } });
+    document.getElementById("btnClear").addEventListener("click", function(){
+      cur.state.entries={}; cur.state.correct={}; cur.state.revealed={}; cur.state.solved=false;
+      document.getElementById("winBox").classList.add("hidden");
+      buildBoard(); paintSelection(); startTimer(); say("Grid cleared — fresh start.","");
+    });
+    document.getElementById("btnBack").addEventListener("click", closePuzzle);
+    document.getElementById("btnBack2").addEventListener("click", closePuzzle);
+    document.getElementById("btnNext").addEventListener("click", function(){ openPuzzle((curIdx+1)%PUZZLES.length); });
+
+    /* ---------- theme toggle ---------- */
+    var themeToggle=document.getElementById("themeToggle");
+    function syncThemeToggle(){
+      var dark=document.documentElement.getAttribute("data-theme")==="dark";
+      themeToggle.setAttribute("aria-pressed", dark?"true":"false");
+      themeToggle.querySelector(".theme-label").textContent=dark?"Light mode":"Dark mode";
+      themeToggle.querySelector(".icon-moon").classList.toggle("hidden", dark);
+      themeToggle.querySelector(".icon-sun").classList.toggle("hidden", !dark);
+      document.documentElement.style.colorScheme=dark?"dark":"light";
+      var tc=document.getElementById("themeColorMeta");
+      if(tc) tc.setAttribute("content", dark?"#12161d":"#f4f1ea");
+    }
+    themeToggle.addEventListener("click", function(){
+      var dark=document.documentElement.getAttribute("data-theme")==="dark";
+      document.documentElement.setAttribute("data-theme", dark?"light":"dark");
+      syncThemeToggle();
+    });
+    syncThemeToggle();
+
+    /* ---------- PWA: offline worker + install ---------- */
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", function () {
+        navigator.serviceWorker.register("sw.js").catch(function () { /* page still works fully online */ });
+      });
+    }
+    var installBtn = document.getElementById("installBtn");
+    var installNote = document.getElementById("installNote");
+    var deferredInstall = null;
+    function standaloneNow() {
+      return (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) || window.navigator.standalone === true;
+    }
+    window.addEventListener("beforeinstallprompt", function (e) {
+      e.preventDefault();
+      deferredInstall = e;
+      if (!standaloneNow()) installBtn.classList.remove("hidden");
+    });
+    installBtn.addEventListener("click", function () {
+      if (!deferredInstall) return;
+      /* the beforeinstallprompt event's own install method (not window.prompt) */
+      deferredInstall["prompt"]();
+      deferredInstall.userChoice.then(function () {
+        deferredInstall = null;
+        installBtn.classList.add("hidden");
+      });
+    });
+    window.addEventListener("appinstalled", function () {
+      deferredInstall = null;
+      installBtn.classList.add("hidden");
+      installNote.classList.add("hidden");
+    });
+    /* iOS Safari has no install prompt: point at Share → Add to Home Screen. */
+    (function () {
+      var ua = window.navigator.userAgent || "";
+      var isIOS = /iphone|ipad|ipod/i.test(ua) || (ua.indexOf("Macintosh") > -1 && "ontouchend" in document);
+      var isSafari = /safari/i.test(ua) && !/crios|fxios|chrome|android/i.test(ua);
+      if (isIOS && isSafari && !standaloneNow()) {
+        installNote.textContent = "Install: tap Share, then \u201CAdd to Home Screen\u201D";
+        installNote.classList.remove("hidden");
+      }
+    })();
+
+    renderPack();
+    </script>
+  </body>
+</html>

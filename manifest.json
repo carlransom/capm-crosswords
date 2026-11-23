@@ -1,0 +1,38 @@
+{
+  "background_color": "#f4f1ea",
+  "categories": [
+    "education",
+    "games"
+  ],
+  "description": "Fifteen crosswords built from the CAPM exam content outline \u2014 120 terms across every exam domain, with timer, check and reveal tools. Works offline once installed.",
+  "dir": "ltr",
+  "display": "standalone",
+  "icons": [
+    {
+      "purpose": "any",
+      "sizes": "192x192",
+      "src": "icon-192.png",
+      "type": "image/png"
+    },
+    {
+      "purpose": "any",
+      "sizes": "512x512",
+      "src": "icon-512.png",
+      "type": "image/png"
+    },
+    {
+      "purpose": "maskable",
+      "sizes": "512x512",
+      "src": "icon-maskable-512.png",
+      "type": "image/png"
+    }
+  ],
+  "id": "./index.html",
+  "lang": "en",
+  "name": "CAPM Crossword Puzzles",
+  "orientation": "any",
+  "scope": "./",
+  "short_name": "CAPM Crosswords",
+  "start_url": "./index.html",
+  "theme_color": "#f4f1ea"
+}
