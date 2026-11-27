@@ -81,6 +81,30 @@
       .pcard .status{margin-left:auto;font-weight:800}
       .pcard .status.done{color:var(--good)}
       .pcard .status.mid{color:var(--gold)}
+      /* ---------- pack groups, locks, bundle, buy panel ---------- */
+      .packgroup{margin-top:28px}
+      .packhead{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;border-bottom:2px solid var(--gold);padding-bottom:8px}
+      .packhead h2{font-size:clamp(21px,3.4vw,27px);line-height:1.15}
+      .packhead .packcount{font-size:13px;font-weight:700;color:var(--ink2)}
+      .packhead .price{margin-left:auto;background:var(--gold-soft);color:var(--gold);border-radius:99px;padding:5px 12px;font-size:13px;font-weight:800}
+      .packgroup .pack{margin-top:14px}
+      .pcard .lockrow{display:flex;align-items:center;gap:7px;margin-top:12px;font-size:13px;font-weight:800;color:var(--gold)}
+      .pcard .lockrow svg{width:15px;height:15px;flex:none}
+      .bundle{margin-top:22px;background:var(--surface);border:1.5px solid var(--gold);border-radius:14px;padding:18px;display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center}
+      .bundle h2{font-size:clamp(20px,3.2vw,25px);line-height:1.15}
+      .bundle p{margin:4px 0 0;color:var(--ink2);font-size:14px;max-width:58ch}
+      .bundle .price{font-family:"Source Serif 4",Georgia,serif;font-size:30px;font-weight:800;color:var(--gold)}
+      .bundle .buy{margin-left:auto}
+      .buyoverlay{position:fixed;inset:0;background:rgba(10,14,20,.55);display:flex;align-items:center;justify-content:center;padding:18px;z-index:50}
+      .buypanel{background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);max-width:430px;width:100%;padding:24px}
+      .buypanel .domain{font-size:12px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--gold)}
+      .buypanel h2{font-size:26px;margin:6px 0 8px;line-height:1.15}
+      .buypanel p{margin:0 0 10px;color:var(--ink2);font-size:15px}
+      .buypanel .bigprice{font-family:"Source Serif 4",Georgia,serif;font-size:36px;font-weight:800;color:var(--accent);margin:4px 0 14px}
+      .buypanel .actions{display:flex;gap:10px;flex-wrap:wrap}
+      .buymsg{margin:14px 0 0;background:var(--gold-soft);color:var(--ink);border-radius:10px;padding:12px 14px;font-size:14px;font-weight:600}
+      .pcard .freerow{margin-top:12px;font-size:13px;font-weight:800;color:var(--good)}
+      .dlbtn{width:100%;margin-top:8px}
       /* ---------- play view ---------- */
       .hidden{display:none!important}
       .playhead{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;justify-content:space-between;margin-top:6px}
@@ -155,8 +179,16 @@
           <div class="bar" aria-hidden="true"><i id="packBar"></i></div>
           <span class="stat"><b id="wordCount">0</b> CAPM terms in the pack</span>
         </div>
-        <div class="pack" id="packGrid"></div>
-        <p class="foot">Clues follow the PMI CAPM Exam Content Outline and PMBOK® Guide terminology. Progress is kept for this session — close the page and the grids reset. PMBOK and CAPM are registered marks of the Project Management Institute, Inc. This is an independent study aid, not affiliated with PMI.</p>
+        <div class="bundle">
+          <div>
+            <h2>All 3 Packs — $4.99</h2>
+            <p>Every puzzle in the set: Foundations, Planning &amp; Control, and People &amp; Risk. Bought separately the three packs total $8.97 — the bundle saves you $3.98.</p>
+          </div>
+          <span class="price">$4.99</span>
+          <button class="btn gold buy" id="bundleBuy" type="button">Buy the bundle</button>
+        </div>
+        <div id="packGroups"></div>
+        <p class="foot">Clues follow the PMI CAPM Exam Content Outline and PMBOK® Guide terminology. Progress is saved on this device — close the page and your grids, timer and checks are right where you left them when you come back. PMBOK and CAPM are registered marks of the Project Management Institute, Inc. This is an independent study aid, not affiliated with PMI.</p>
       </section>
 
       <!-- ======= PLAY VIEW ======= -->
@@ -178,6 +210,7 @@
           <button class="btn" id="btnRevealLetter" type="button">Reveal letter</button>
           <button class="btn" id="btnRevealWord" type="button">Reveal word</button>
           <button class="btn" id="btnClear" type="button">Clear grid</button>
+          <button class="btn hidden" id="btnDownload" type="button">Download printable PDF</button>
         </div>
         <div class="layout">
           <div>
@@ -205,6 +238,21 @@
           </div>
         </div>
       </section>
+
+      <!-- ======= BUY PANEL ======= -->
+      <div class="buyoverlay hidden" id="buyOverlay">
+        <div class="buypanel" role="dialog" aria-modal="true" aria-labelledby="buyTitle">
+          <div class="domain" id="buyKicker">Puzzle pack</div>
+          <h2 id="buyTitle"></h2>
+          <p id="buyDesc"></p>
+          <div class="bigprice" id="buyPrice"></div>
+          <div class="actions">
+            <button class="btn primary" id="buyBtn" type="button">Buy</button>
+            <button class="btn" id="buyClose" type="button">Not now</button>
+          </div>
+          <p class="buymsg hidden" id="buyMsg" aria-live="polite"></p>
+        </div>
+      </div>
     </main>
 
     <script>
@@ -480,33 +528,255 @@
     PUZZLES.forEach(function(p){ p.words.forEach(function(w){ seenAnswers[w[0]]=1; }); });
     document.getElementById("wordCount").textContent = Object.keys(seenAnswers).length;
 
-    /* ---------- pack view ---------- */
-    var packGrid = document.getElementById("packGrid");
-    function renderPack(){
-      packGrid.innerHTML="";
-      var done=0;
-      PUZZLES.forEach(function(p, idx){
-        var st=p.state;
-        var filledSet = {};
-        Object.keys(st.entries).forEach(function(k){ if(st.entries[k]) filledSet[k]=1; });
-        Object.keys(st.correct).forEach(function(k){ filledSet[k]=1; });
-        Object.keys(st.revealed).forEach(function(k){ filledSet[k]=1; });
-        var filled = Object.keys(filledSet).length;
-        var total = Object.keys(p.solution).length;
-        var pct = Math.round(100*filled/total);
-        if (st.solved) done++;
-        var card=document.createElement("button");
-        card.type="button"; card.className="pcard";
-        var status = st.solved ? '<span class="status done">✓ Solved</span>'
-                   : pct>0 ? '<span class="status mid">'+pct+'% filled</span>'
-                   : '<span class="status">Not started</span>';
-        card.innerHTML = '<div class="domain">'+p.domain+'</div><h3>'+p.title+'</h3><p>'+p.blurb+'</p>'+
-          '<div class="meta"><span>'+p.words.length+' words</span><span>'+p.rows+' × '+p.cols+' grid</span>'+status+'</div>';
-        card.addEventListener("click", function(){ openPuzzle(idx); });
-        packGrid.appendChild(card);
+    /* ---------- packs, ownership, saved progress ---------- */
+    var FREE_ID = "fundamentals";   // the one free puzzle: playable in the browser + downloadable
+    var PACKS = [
+      { id:"pack1", name:"Pack 1 — Foundations", price:"$2.99", puzzleIds:["fundamentals","predictive","agile","integration","business-analysis"] },
+      { id:"pack2", name:"Pack 2 — Planning & Control", price:"$2.99", puzzleIds:["scope","schedule-tools","cost","earned-value","quality"] },
+      { id:"pack3", name:"Pack 3 — People & Risk", price:"$2.99", puzzleIds:["resources","stakeholders","risk","procurement","ethics-tailoring"] }
+    ];
+    var puzzlePack = {};
+    PACKS.forEach(function(pk){ pk.puzzleIds.forEach(function(pid){ puzzlePack[pid]=pk; }); });
+    var ORDER = [];   // puzzle indices in pack display order
+    PACKS.forEach(function(pk){ pk.puzzleIds.forEach(function(pid){
+      ORDER.push(PUZZLES.findIndex(function(p){ return p.id===pid; }));
+    }); });
+    function puzzleById(id){ return PUZZLES.find(function(p){ return p.id===id; }); }
+
+    var OWNED_KEY="capm-crosswords-owned", PROGRESS_KEY="capm-crosswords-progress";
+    var owned = {};
+    try{ (JSON.parse(window.localStorage.getItem(OWNED_KEY)||"[]")).forEach(function(id){ owned[id]=1; }); }catch(e){}
+    function packUnlocked(pk){ return !!(owned[pk.id]||owned["bundle"]); }
+    function puzzleUnlocked(p){ return p.id===FREE_ID || packUnlocked(puzzlePack[p.id]); }
+
+    function saveProgress(){
+      var data={};
+      PUZZLES.forEach(function(p){ data[p.id]=p.state; });
+      try{ window.localStorage.setItem(PROGRESS_KEY, JSON.stringify(data)); }catch(e){}
+    }
+    (function loadProgress(){
+      var data=null;
+      try{ data=JSON.parse(window.localStorage.getItem(PROGRESS_KEY)||"null"); }catch(e){}
+      if (!data) return;
+      PUZZLES.forEach(function(p){
+        var s=data[p.id]; if(!s) return;
+        p.state.entries=s.entries||{}; p.state.correct=s.correct||{}; p.state.revealed=s.revealed||{};
+        p.state.checks=s.checks||0; p.state.solved=!!s.solved; p.state.seconds=s.seconds||0;
       });
-      document.getElementById("doneCount").textContent = done;
-      document.getElementById("packBar").style.width = (100*done/PUZZLES.length)+"%";
+    })();
+    window.addEventListener("pagehide", saveProgress);
+
+    /* ---------- pack view ---------- */
+    var packGroups = document.getElementById("packGroups");
+    var LOCK_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>';
+    function renderPack(){
+      packGroups.innerHTML="";
+      var done=0;
+      PACKS.forEach(function(pk){
+        var unlocked=packUnlocked(pk);
+        var solvedInPack=0;
+        pk.puzzleIds.forEach(function(pid){ if (puzzleById(pid).state.solved) solvedInPack++; });
+        done+=solvedInPack;
+        var group=document.createElement("div"); group.className="packgroup";
+        var head=document.createElement("div"); head.className="packhead";
+        head.innerHTML='<h2>'+pk.name+'</h2><span class="packcount">'+solvedInPack+' of '+pk.puzzleIds.length+' solved</span>'+
+          '<span class="price">'+(unlocked?'Unlocked':pk.price)+'</span>';
+        group.appendChild(head);
+        var grid=document.createElement("div"); grid.className="pack";
+        pk.puzzleIds.forEach(function(pid){
+          var p=puzzleById(pid), idx=PUZZLES.indexOf(p), st=p.state;
+          var isFree = pid===FREE_ID, open = isFree||unlocked;
+          var filledSet={};
+          Object.keys(st.entries).forEach(function(k){ if(st.entries[k]) filledSet[k]=1; });
+          Object.keys(st.correct).forEach(function(k){ filledSet[k]=1; });
+          Object.keys(st.revealed).forEach(function(k){ filledSet[k]=1; });
+          var pct=Math.round(100*Object.keys(filledSet).length/Object.keys(p.solution).length);
+          var status = st.solved ? '<span class="status done">✓ Solved</span>'
+                     : pct>0 ? '<span class="status mid">'+pct+'% filled</span>'
+                     : '<span class="status">Not started</span>';
+          var wrap=document.createElement("div"); wrap.className="packcell";
+          var card=document.createElement("button");
+          card.type="button"; card.className="pcard"+(open?"":" locked");
+          card.innerHTML='<div class="domain">'+p.domain+'</div><h3>'+p.title+'</h3><p>'+p.blurb+'</p>'+
+            '<div class="meta"><span>'+p.words.length+' words</span><span>'+p.rows+' × '+p.cols+' grid</span>'+status+'</div>'+
+            (isFree ? '<div class="freerow">FREE — play in the browser, or download the printable PDF</div>'
+                    : open ? ''
+                    : '<div class="lockrow">'+LOCK_SVG+'<span>Locked — '+pk.name.split(" — ")[0]+' · '+pk.price+'</span></div>');
+          card.addEventListener("click", function(){ if (open) openPuzzle(idx); else openBuy({type:"pack", pack:pk}); });
+          wrap.appendChild(card);
+          if (isFree){
+            var dl=document.createElement("button");
+            dl.type="button"; dl.className="btn dlbtn"; dl.textContent="Download printable PDF";
+            dl.addEventListener("click", function(){ downloadPDF(); });
+            wrap.appendChild(dl);
+          }
+          grid.appendChild(wrap);
+        });
+        group.appendChild(grid);
+        packGroups.appendChild(group);
+      });
+      document.getElementById("doneCount").textContent=done;
+      document.getElementById("packBar").style.width=(100*done/PUZZLES.length)+"%";
+    }
+
+    /* ---------- buy panel (checkout arrives with the store release) ---------- */
+    var buyOverlay=document.getElementById("buyOverlay");
+    function openBuy(item){
+      var title=document.getElementById("buyTitle"), desc=document.getElementById("buyDesc"),
+          price=document.getElementById("buyPrice"), kicker=document.getElementById("buyKicker"),
+          btn=document.getElementById("buyBtn");
+      document.getElementById("buyMsg").classList.add("hidden");
+      if (item.type==="bundle"){
+        kicker.textContent="Bundle · all three packs";
+        title.textContent="All 3 Packs";
+        desc.textContent="Foundations, Planning & Control, and People & Risk — all 15 puzzles. Bought separately the packs total $8.97; the bundle is $4.99, a saving of $3.98.";
+        price.textContent="$4.99";
+        btn.textContent="Buy the bundle — $4.99";
+      } else {
+        var pk=item.pack;
+        kicker.textContent="Puzzle pack";
+        title.textContent=pk.name;
+        var names=pk.puzzleIds.map(function(pid){ return puzzleById(pid).title; });
+        desc.textContent="Five puzzles: "+names.join(", ")+"."+
+          (pk.id==="pack1" ? " Project Management Fundamentals is free to play and download — this pack unlocks the other four." : "");
+        price.textContent=pk.price;
+        btn.textContent="Buy — "+pk.price;
+      }
+      buyOverlay.classList.remove("hidden");
+      btn.focus();
+    }
+    function closeBuy(){ buyOverlay.classList.add("hidden"); }
+    document.getElementById("buyBtn").addEventListener("click", function(){
+      var m=document.getElementById("buyMsg");
+      m.textContent="Checkout isn't wired up yet — this goes on sale with the store release. No payment has been taken.";
+      m.classList.remove("hidden");
+    });
+    document.getElementById("buyClose").addEventListener("click", closeBuy);
+    buyOverlay.addEventListener("click", function(e){ if (e.target===buyOverlay) closeBuy(); });
+    document.addEventListener("keydown", function(e){ if (e.key==="Escape" && !buyOverlay.classList.contains("hidden")) closeBuy(); });
+    document.getElementById("bundleBuy").addEventListener("click", function(){ openBuy({type:"bundle"}); });
+
+    /* ---------- printable, fillable PDF of the free puzzle ----------
+       Hand-built PDF: page 1 is the blank grid (one AcroForm text field per
+       square, so it can be filled on screen or printed) with the clues;
+       page 2 is the plain solution key. */
+    function pdfEsc(s){
+      return String(s)
+        .replace(/\\/g,"\\\\").replace(/\(/g,"\\(").replace(/\)/g,"\\)")
+        .replace(/—/g,"\\227").replace(/–/g,"\\226")
+        .replace(/’/g,"\\222").replace(/‘/g,"\\221")
+        .replace(/“/g,"\\223").replace(/”/g,"\\224")
+        .replace(/·/g,"\\267")
+        .replace(/[^\x20-\x7E]/g,"?");
+    }
+    function textW(s, size){
+      var w=0;
+      for (var i=0;i<s.length;i++){
+        var ch=s.charAt(i);
+        if (" iljtf.,:;'!|".indexOf(ch)>=0) w+=0.30;
+        else if ("mwMW".indexOf(ch)>=0) w+=0.88;
+        else if (ch>="A"&&ch<="Z") w+=0.68;
+        else if (ch>="0"&&ch<="9") w+=0.556;
+        else w+=0.52;
+      }
+      return w*size;
+    }
+    function wrapText(s, size, maxW){
+      var words=String(s).split(/\s+/), lines=[], line="";
+      for (var i=0;i<words.length;i++){
+        var t=line?line+" "+words[i]:words[i];
+        if (line && textW(t,size)>maxW){ lines.push(line); line=words[i]; } else line=t;
+      }
+      if (line) lines.push(line);
+      return lines;
+    }
+    function buildPuzzlePDF(p){
+      var W=612, H=792, M=48;
+      var cell=Math.min(34, Math.floor(350/p.rows), Math.floor((W-2*M)/p.cols));
+      var gridW=cell*p.cols, x0=Math.round((W-gridW)/2), gridTop=118;   // gridTop: distance from page top
+      function cellX(c){ return x0+c*cell; }
+      function cellBottom(r){ return H-(gridTop+(r+1)*cell); }
+      function txt(x, y, font, size, s){ return "BT /"+font+" "+size+" Tf 1 0 0 1 "+x+" "+y+" Tm ("+pdfEsc(s)+") Tj ET"; }
+      function gridOps(withLetters){
+        var ops=["0.25 w"];
+        for (var r=0;r<p.rows;r++) for (var c=0;c<p.cols;c++){
+          var k=r+","+c, x=cellX(c), yb=cellBottom(r);
+          if (!(k in p.solution)){ ops.push("0.13 g "+x+" "+yb+" "+cell+" "+cell+" re f 0 g"); }
+          else {
+            ops.push(x+" "+yb+" "+cell+" "+cell+" re S");
+            if (p.numbers[k]) ops.push(txt(x+1.5, yb+cell-8, "F1", 6.5, p.numbers[k]));
+            if (withLetters){
+              var ch=p.solution[k];
+              ops.push(txt(x+(cell-textW(ch,13))/2, yb+cell*0.30, "F2", 13, ch));
+            }
+          }
+        }
+        return ops;
+      }
+      var across=[], down=[];
+      var order=p.words.map(function(w,i){return i;}).sort(function(a,b){return p.wordNum[a]-p.wordNum[b];});
+      order.forEach(function(wi){ (p.words[wi][3]==="A"?across:down).push(wi); });
+      // page 1: fillable blank grid + clues
+      var s1=[txt(M, H-58, "F2", 19, p.title)];
+      s1.push(txt(M, H-76, "F1", 10.5, "CAPM Crossword Puzzles · "+puzzlePack[p.id].name+" · Free printable"));
+      s1.push(txt(M, H-92, "F1", 9.5, "One letter per square — type into the squares on screen, or print it and fill it in by hand."));
+      s1=s1.concat(gridOps(false));
+      var clueY=gridTop+cell*p.rows+34;
+      function clueCol(x, label, list){
+        var ops=[txt(x, H-clueY, "F2", 12.5, label)];
+        var y=clueY+19;
+        list.forEach(function(wi){
+          var lines=wrapText(p.words[wi][4], 9.5, 218);
+          lines.forEach(function(ln, li){
+            ops.push(txt(x+(li===0?0:13), H-y, "F1", 9.5, (li===0?p.wordNum[wi]+". ":"")+ln));
+            y+=12.5;
+          });
+          y+=4;
+        });
+        return ops;
+      }
+      s1=s1.concat(clueCol(M, "Across", across));
+      s1=s1.concat(clueCol(W/2+12, "Down", down));
+      s1.push(txt(M, 30, "F1", 8, "Independent study aid — not affiliated with PMI."));
+      // page 2: solution key (plain, no fields)
+      var s2=[txt(M, H-58, "F2", 19, "Solution — "+p.title)];
+      s2.push(txt(M, H-76, "F1", 10.5, "CAPM Crossword Puzzles · Answer key"));
+      s2=s2.concat(gridOps(true));
+      // one AcroForm text field per white square, object numbers from 9 up
+      var fieldRefs=[], fieldObjs=[], fi=0;
+      for (var r=0;r<p.rows;r++) for (var c=0;c<p.cols;c++){
+        if (!((r+","+c) in p.solution)) continue;
+        fieldRefs.push((9+fi)+" 0 R"); fi++;
+        var fx=cellX(c)+1, fy=cellBottom(r)+1;
+        fieldObjs.push("<< /Type /Annot /Subtype /Widget /P 5 0 R /Rect ["+fx+" "+fy+" "+(fx+cell-2)+" "+(fy+cell-2)+"] /Border [0 0 0] /FT /Tx /T (cell_"+r+"_"+c+") /DA (/Helv 13 Tf 0 g) /Q 1 /MaxLen 1 /F 4 >>");
+      }
+      var stream1=s1.join("\n"), stream2=s2.join("\n");
+      var objs=[];
+      objs[0]="<< /Type /Catalog /Pages 2 0 R /AcroForm << /Fields ["+fieldRefs.join(" ")+"] /DA (/Helv 13 Tf 0 g) /DR << /Font << /Helv 3 0 R >> >> /NeedAppearances true >> >>";
+      objs[1]="<< /Type /Pages /Kids [5 0 R 7 0 R] /Count 2 >>";
+      objs[2]="<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>";
+      objs[3]="<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>";
+      objs[4]="<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents 6 0 R /Annots ["+fieldRefs.join(" ")+"] >>";
+      objs[5]="<< /Length "+stream1.length+" >>\nstream\n"+stream1+"\nendstream";
+      objs[6]="<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents 8 0 R >>";
+      objs[7]="<< /Length "+stream2.length+" >>\nstream\n"+stream2+"\nendstream";
+      fieldObjs.forEach(function(f){ objs.push(f); });
+      var out="%PDF-1.4\n", offsets=[];
+      objs.forEach(function(body, i){ offsets.push(out.length); out+=(i+1)+" 0 obj\n"+body+"\nendobj\n"; });
+      var xrefPos=out.length;
+      out+="xref\n0 "+(objs.length+1)+"\n0000000000 65535 f \n";
+      offsets.forEach(function(o){ var s="0000000000"+o; out+=s.slice(s.length-10)+" 00000 n \n"; });
+      out+="trailer\n<< /Size "+(objs.length+1)+" /Root 1 0 R >>\nstartxref\n"+xrefPos+"\n%%EOF";
+      return new Blob([out], {type:"application/pdf"});
+    }
+    function downloadPDF(){
+      var blob=buildPuzzlePDF(puzzleById(FREE_ID));
+      var url=URL.createObjectURL(blob);
+      var a=document.createElement("a");
+      a.href=url; a.download="capm-crossword-project-management-fundamentals.pdf";
+      document.body.appendChild(a); a.click();
+      window.setTimeout(function(){ document.body.removeChild(a); URL.revokeObjectURL(url); }, 500);
+      say("Printable PDF downloaded — fillable grid and clues on page 1, solution key on page 2.", "ok");
     }
 
     /* ---------- play view ---------- */
@@ -522,8 +792,10 @@
     function say(text, cls){ msgEl.textContent=text||""; msgEl.className="msg "+(cls||""); }
 
     function openPuzzle(idx){
+      if (!puzzleUnlocked(PUZZLES[idx])){ openBuy({type:"pack", pack:puzzlePack[PUZZLES[idx].id]}); return; }
       saveTimer();
       curIdx=idx; cur=PUZZLES[idx];
+      document.getElementById("btnDownload").classList.toggle("hidden", cur.id!==FREE_ID);
       document.getElementById("packView").classList.add("hidden");
       document.getElementById("playView").classList.remove("hidden");
       document.getElementById("winBox").classList.add("hidden");
@@ -546,11 +818,11 @@
     function startTimer(){
       clearInterval(timerId);
       timerId=setInterval(function(){
-        if (cur && !cur.state.solved){ cur.state.seconds++; tickTimer(); }
+        if (cur && !cur.state.solved){ cur.state.seconds++; tickTimer(); if (cur.state.seconds%5===0) saveProgress(); }
       },1000);
       tickTimer();
     }
-    function saveTimer(){ clearInterval(timerId); timerId=null; }
+    function saveTimer(){ clearInterval(timerId); timerId=null; saveProgress(); }
     function tickTimer(){
       if(!cur) return;
       var s=cur.state.seconds, m=Math.floor(s/60), ss=s%60;
@@ -646,6 +918,7 @@
       if (v) move(1);
       updateProgress();
       maybeWin();
+      saveProgress();
     }
     function onKeydown(e){
       var r=sel.r, c=sel.c;
@@ -714,7 +987,9 @@
       if (wrong) say(label+": "+wrong+" letter"+(wrong>1?"s are":" is")+" wrong (marked red)."+(newlyRight?" "+newlyRight+" locked in ✓":""), "err");
       else if (blank) say(label+": everything filled in so far is right — "+blank+" square"+(blank>1?"s":"")+" still blank.", "ok");
       else say(label+": all correct ✓", "ok");
+      saveProgress();
       maybeWin();
+      saveProgress();
     }
     function maybeWin(){
       var keys=Object.keys(cur.solution);
@@ -748,7 +1023,7 @@
         var inp=inputAt(rc[0],rc[1]); if(inp) inp.value=cur.solution[k];
         var cd=cellDiv(rc[0],rc[1]); if(cd){ cd.classList.add("revealed"); cd.classList.remove("wrong"); }
       });
-      paintSelection(); updateProgress(); maybeWin();
+      paintSelection(); updateProgress(); saveProgress(); maybeWin(); saveProgress();
     }
 
     document.getElementById("btnCheck").addEventListener("click", function(){
@@ -766,11 +1041,16 @@
       cur.state.entries={}; cur.state.correct={}; cur.state.revealed={}; cur.state.solved=false;
       cur.state.seconds=0; cur.state.checks=0;
       document.getElementById("winBox").classList.add("hidden");
-      buildBoard(); paintSelection(); startTimer(); tickTimer(); say("Grid cleared — fresh start.","");
+      buildBoard(); paintSelection(); startTimer(); tickTimer(); saveProgress(); say("Grid cleared — fresh start.","");
     });
+    document.getElementById("btnDownload").addEventListener("click", function(){ downloadPDF(); });
     document.getElementById("btnBack").addEventListener("click", closePuzzle);
     document.getElementById("btnBack2").addEventListener("click", closePuzzle);
-    document.getElementById("btnNext").addEventListener("click", function(){ openPuzzle((curIdx+1)%PUZZLES.length); });
+    document.getElementById("btnNext").addEventListener("click", function(){
+      var pos=ORDER.indexOf(curIdx), next=-1;
+      for (var i=pos+1;i<ORDER.length;i++){ if (puzzleUnlocked(PUZZLES[ORDER[i]])){ next=ORDER[i]; break; } }
+      if (next>=0) openPuzzle(next); else closePuzzle();
+    });
 
     /* ---------- theme toggle ---------- */
     var themeToggle=document.getElementById("themeToggle");
