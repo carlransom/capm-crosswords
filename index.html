@@ -126,6 +126,10 @@
       .btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
       .btn.gold{background:var(--gold);border-color:var(--gold);color:#fff}
       :root[data-theme="dark"] .btn.gold{color:#191204}
+      .btn:disabled{background:var(--surface2);border-color:var(--line);color:var(--ink2);cursor:not-allowed}
+      .btn:disabled:hover{border-color:var(--line)}
+      :root[data-theme="dark"] .btn.gold:disabled{color:var(--ink2)}
+      .soon-note{margin:6px 0 0;font-size:13px;font-weight:700;color:var(--gold)}
       .layout{display:grid;grid-template-columns:minmax(0,560px) minmax(0,1fr);gap:22px;align-items:start}
       @media (max-width:820px){.layout{grid-template-columns:1fr}}
       .boardbox{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px;box-shadow:var(--shadow)}
@@ -191,9 +195,10 @@
           <div>
             <h2>All 3 Packs — $4.99</h2>
             <p>Every puzzle in the set: Foundations, Planning &amp; Control, and People &amp; Risk. Bought separately the three packs total $8.97 — the bundle saves you $3.98.</p>
+            <p class="soon-note">Packs will be available soon — purchasing is paused for now.</p>
           </div>
           <span class="price">$4.99</span>
-          <button class="btn gold buy" id="bundleBuy" type="button">Buy the bundle</button>
+          <button class="btn gold buy" id="bundleBuy" type="button" disabled aria-disabled="true">Coming soon</button>
         </div>
         <div id="packGroups"></div>
         <p class="foot">Clues follow the PMI CAPM Exam Content Outline and PMBOK® Guide terminology. Progress is saved on this device — close the page and your grids, timer and checks are right where you left them when you come back. PMBOK and CAPM are registered marks of the Project Management Institute, Inc. This is an independent study aid, not affiliated with PMI.</p>
@@ -255,10 +260,10 @@
           <p id="buyDesc"></p>
           <div class="bigprice" id="buyPrice"></div>
           <div class="actions">
-            <button class="btn primary" id="buyBtn" type="button">Buy</button>
+            <button class="btn primary" id="buyBtn" type="button" disabled aria-disabled="true">Coming soon</button>
             <button class="btn" id="buyClose" type="button">Not now</button>
           </div>
-          <p class="buymsg hidden" id="buyMsg" aria-live="polite"></p>
+          <p class="buymsg" id="buyMsg" aria-live="polite">These packs will be available soon — purchasing is paused for now. If you already have an unlock code, enter it below.</p>
           <div class="unlockbox">
             <label for="unlockInput">Have an unlock code?</label>
             <div class="unlockrow">
@@ -641,13 +646,10 @@
       document.getElementById("packBar").style.width=(100*done/PUZZLES.length)+"%";
     }
 
-    /* ---------- buy panel: Square checkout links + unlock codes ---------- */
-    var SQUARE_LINKS = {
-      pack1:"https://square.link/u/iM100S4D",
-      pack2:"https://square.link/u/O0UmSNEh",
-      pack3:"https://square.link/u/4pdf3qBa",
-      bundle:"https://square.link/u/G5aaJuGa"
-    };
+    /* ---------- buy panel: purchasing paused (coming soon) + unlock codes ---------- */
+    /* Checkout is temporarily disabled — no payment links are used anywhere
+       and every Buy button renders disabled as "Coming soon". The unlock
+       codes below still work exactly as before. */
     /* code -> pack ids it unlocks (the bundle code unlocks all three) */
     var UNLOCK_CODES = {
       "CAPM-P1-7HCCYH":["pack1"],
@@ -662,7 +664,9 @@
       var title=document.getElementById("buyTitle"), desc=document.getElementById("buyDesc"),
           price=document.getElementById("buyPrice"), kicker=document.getElementById("buyKicker"),
           btn=document.getElementById("buyBtn");
-      document.getElementById("buyMsg").classList.add("hidden");
+      var bm=document.getElementById("buyMsg");
+      bm.textContent="These packs will be available soon — purchasing is paused for now. If you already have an unlock code, enter it below.";
+      bm.classList.remove("hidden");
       var um=document.getElementById("unlockMsg");
       um.classList.add("hidden"); um.textContent="";
       document.getElementById("unlockInput").value="";
@@ -671,7 +675,7 @@
         title.textContent="All 3 Packs";
         desc.textContent="Foundations, Planning & Control, and People & Risk — all 15 puzzles. Bought separately the packs total $8.97; the bundle is $4.99, a saving of $3.98.";
         price.textContent="$4.99";
-        btn.textContent="Buy the bundle — $4.99";
+        btn.textContent="Coming soon"; btn.disabled=true; btn.setAttribute("aria-disabled","true");
       } else {
         var pk=item.pack;
         kicker.textContent="Puzzle pack";
@@ -680,21 +684,12 @@
         desc.textContent="Five puzzles: "+names.join(", ")+"."+
           (pk.id==="pack1" ? " Project Management Fundamentals is free to play and download — this pack unlocks the other four." : "");
         price.textContent=pk.price;
-        btn.textContent="Buy — "+pk.price;
+        btn.textContent="Coming soon"; btn.disabled=true; btn.setAttribute("aria-disabled","true");
       }
       buyOverlay.classList.remove("hidden");
-      btn.focus();
+      document.getElementById("buyClose").focus();
     }
     function closeBuy(){ buyOverlay.classList.add("hidden"); }
-    document.getElementById("buyBtn").addEventListener("click", function(){
-      if (!buyItem) return;
-      var key = buyItem.type==="bundle" ? "bundle" : buyItem.pack.id;
-      var link = SQUARE_LINKS[key];
-      if (link) window.open(link, "_blank", "noopener");
-      var m=document.getElementById("buyMsg");
-      m.textContent="Square checkout opened in a new tab. After you pay, Square sends you to a page showing your unlock code — enter it below and the puzzles unlock right away.";
-      m.classList.remove("hidden");
-    });
     function tryUnlock(){
       var input=document.getElementById("unlockInput"), msg=document.getElementById("unlockMsg");
       var code=(input.value||"").trim().toUpperCase();
@@ -723,7 +718,6 @@
     document.getElementById("buyClose").addEventListener("click", closeBuy);
     buyOverlay.addEventListener("click", function(e){ if (e.target===buyOverlay) closeBuy(); });
     document.addEventListener("keydown", function(e){ if (e.key==="Escape" && !buyOverlay.classList.contains("hidden")) closeBuy(); });
-    document.getElementById("bundleBuy").addEventListener("click", function(){ openBuy({type:"bundle"}); });
 
     /* ---------- printable, fillable PDF of the free puzzle ----------
        Hand-built PDF: page 1 is the blank grid (one AcroForm text field per
