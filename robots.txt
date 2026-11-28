@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+Disallow: /thanks.html
+Sitemap: https://black-sand-04296a00f.8.azurestaticapps.net/sitemap.xml
