@@ -103,6 +103,14 @@
       .buypanel .bigprice{font-family:"Source Serif 4",Georgia,serif;font-size:36px;font-weight:800;color:var(--accent);margin:4px 0 14px}
       .buypanel .actions{display:flex;gap:10px;flex-wrap:wrap}
       .buymsg{margin:14px 0 0;background:var(--gold-soft);color:var(--ink);border-radius:10px;padding:12px 14px;font-size:14px;font-weight:600}
+      .unlockbox{margin-top:18px;border-top:1px solid var(--line);padding-top:16px}
+      .unlockbox label{display:block;font-size:14px;font-weight:800;margin-bottom:8px}
+      .unlockrow{display:flex;gap:8px;flex-wrap:wrap}
+      .unlockrow input{flex:1 1 180px;appearance:none;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:10px;padding:10px 12px;font:inherit;font-size:15px;font-weight:600;text-transform:uppercase;letter-spacing:.03em;min-height:44px}
+      .unlockrow input:focus{outline:3px solid var(--gold);outline-offset:1px;border-color:var(--gold)}
+      .unlockmsg{margin:10px 0 0;font-size:14px;font-weight:600}
+      .unlockmsg.err{color:var(--bad)}
+      .unlockmsg.ok{color:var(--good)}
       .pcard .freerow{margin-top:12px;font-size:13px;font-weight:800;color:var(--good)}
       .dlbtn{width:100%;margin-top:8px}
       /* ---------- play view ---------- */
@@ -251,6 +259,14 @@
             <button class="btn" id="buyClose" type="button">Not now</button>
           </div>
           <p class="buymsg hidden" id="buyMsg" aria-live="polite"></p>
+          <div class="unlockbox">
+            <label for="unlockInput">Have an unlock code?</label>
+            <div class="unlockrow">
+              <input id="unlockInput" type="text" placeholder="CAPM-P1-XXXXXX" autocomplete="off" autocapitalize="characters" spellcheck="false" />
+              <button class="btn" id="unlockBtn" type="button">Unlock</button>
+            </div>
+            <p class="unlockmsg hidden" id="unlockMsg" aria-live="polite"></p>
+          </div>
         </div>
       </div>
     </main>
@@ -543,9 +559,15 @@
     }); });
     function puzzleById(id){ return PUZZLES.find(function(p){ return p.id===id; }); }
 
-    var OWNED_KEY="capm-crosswords-owned", PROGRESS_KEY="capm-crosswords-progress";
+    var OWNED_KEY="capm-crosswords-unlocked", PROGRESS_KEY="capm-crosswords-progress";
     var owned = {};
-    try{ (JSON.parse(window.localStorage.getItem(OWNED_KEY)||"[]")).forEach(function(id){ owned[id]=1; }); }catch(e){}
+    try{
+      (JSON.parse(window.localStorage.getItem(OWNED_KEY)||"[]")).forEach(function(id){ owned[id]=1; });
+      (JSON.parse(window.localStorage.getItem("capm-crosswords-owned")||"[]")).forEach(function(id){ owned[id]=1; });   // legacy key from before checkout launched
+    }catch(e){}
+    function saveOwned(){
+      try{ window.localStorage.setItem(OWNED_KEY, JSON.stringify(Object.keys(owned))); }catch(e){}
+    }
     function packUnlocked(pk){ return !!(owned[pk.id]||owned["bundle"]); }
     function puzzleUnlocked(p){ return p.id===FREE_ID || packUnlocked(puzzlePack[p.id]); }
 
@@ -619,13 +641,31 @@
       document.getElementById("packBar").style.width=(100*done/PUZZLES.length)+"%";
     }
 
-    /* ---------- buy panel (checkout arrives with the store release) ---------- */
+    /* ---------- buy panel: Square checkout links + unlock codes ---------- */
+    var SQUARE_LINKS = {
+      pack1:"https://square.link/u/iM100S4D",
+      pack2:"https://square.link/u/O0UmSNEh",
+      pack3:"https://square.link/u/4pdf3qBa",
+      bundle:"https://square.link/u/G5aaJuGa"
+    };
+    /* code -> pack ids it unlocks (the bundle code unlocks all three) */
+    var UNLOCK_CODES = {
+      "CAPM-P1-7HCCYH":["pack1"],
+      "CAPM-P2-74SF6Q":["pack2"],
+      "CAPM-P3-RPC4LJ":["pack3"],
+      "CAPM-BNDL-VVVCI6":["pack1","pack2","pack3"]
+    };
     var buyOverlay=document.getElementById("buyOverlay");
+    var buyItem=null;
     function openBuy(item){
+      buyItem=item;
       var title=document.getElementById("buyTitle"), desc=document.getElementById("buyDesc"),
           price=document.getElementById("buyPrice"), kicker=document.getElementById("buyKicker"),
           btn=document.getElementById("buyBtn");
       document.getElementById("buyMsg").classList.add("hidden");
+      var um=document.getElementById("unlockMsg");
+      um.classList.add("hidden"); um.textContent="";
+      document.getElementById("unlockInput").value="";
       if (item.type==="bundle"){
         kicker.textContent="Bundle · all three packs";
         title.textContent="All 3 Packs";
@@ -647,9 +687,38 @@
     }
     function closeBuy(){ buyOverlay.classList.add("hidden"); }
     document.getElementById("buyBtn").addEventListener("click", function(){
+      if (!buyItem) return;
+      var key = buyItem.type==="bundle" ? "bundle" : buyItem.pack.id;
+      var link = SQUARE_LINKS[key];
+      if (link) window.open(link, "_blank", "noopener");
       var m=document.getElementById("buyMsg");
-      m.textContent="Checkout isn't wired up yet — this goes on sale with the store release. No payment has been taken.";
+      m.textContent="Square checkout opened in a new tab. After you pay, Square sends you to a page showing your unlock code — enter it below and the puzzles unlock right away.";
       m.classList.remove("hidden");
+    });
+    function tryUnlock(){
+      var input=document.getElementById("unlockInput"), msg=document.getElementById("unlockMsg");
+      var code=(input.value||"").trim().toUpperCase();
+      var packs=UNLOCK_CODES[code];
+      msg.classList.remove("hidden","err","ok");
+      if (!packs){
+        msg.textContent="That code didn't match — check it and try again.";
+        msg.classList.add("err");
+        return;
+      }
+      packs.forEach(function(id){ owned[id]=1; });
+      saveOwned();
+      renderPack();
+      var names=packs.map(function(id){
+        return PACKS.filter(function(pk){ return pk.id===id; })[0].name;
+      });
+      msg.textContent="Unlocked ✓ "+names.join(", ")+" — the puzzles are ready to play.";
+      msg.classList.add("ok");
+      input.value="";
+      window.setTimeout(closeBuy, 1400);
+    }
+    document.getElementById("unlockBtn").addEventListener("click", tryUnlock);
+    document.getElementById("unlockInput").addEventListener("keydown", function(e){
+      if (e.key==="Enter"){ e.preventDefault(); tryUnlock(); }
     });
     document.getElementById("buyClose").addEventListener("click", closeBuy);
     buyOverlay.addEventListener("click", function(e){ if (e.target===buyOverlay) closeBuy(); });
