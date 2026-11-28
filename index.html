@@ -182,6 +182,24 @@
       .unlockmsg.ok{color:var(--good)}
       .pcard .freerow{margin-top:12px;font-size:13px;font-weight:800;color:var(--good)}
       .dlbtn{width:100%;margin-top:8px}
+      /* ---------- daily puzzle ---------- */
+      .daily{margin-top:18px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;box-shadow:var(--shadow)}
+      .dailyhead{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:flex-start;justify-content:space-between}
+      .daily .domain{font-size:12px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--gold)}
+      .daily h2{font-size:clamp(21px,3.4vw,27px);line-height:1.15;margin-top:4px}
+      .dailydate{margin:6px 0 0;color:var(--ink2);font-size:14px;font-weight:600}
+      .dailystreak{background:var(--gold-soft);color:var(--gold);border-radius:99px;padding:6px 14px;font-size:13px;font-weight:800;white-space:nowrap}
+      .dailybody{display:flex;gap:18px;margin-top:14px;align-items:flex-start;flex-wrap:wrap}
+      .dailypreview{display:grid;gap:1.5px;background:var(--cell-block);border:2px solid var(--cell-block);border-radius:6px;overflow:hidden;flex:none}
+      .dailypreview .dc{width:22px;height:22px;background:var(--cell);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--ink)}
+      .dailypreview .dc.block{background:var(--cell-block)}
+      .dailypreview .dc.got{background:var(--good-bg);color:var(--good)}
+      @media (max-width:520px){.dailypreview .dc{width:19px;height:19px;font-size:11px}}
+      .dailyinfo{flex:1 1 260px;min-width:240px}
+      .dailyinfo p{margin:0;color:var(--ink2);font-size:14px}
+      .dailyinfo .dailystatus{margin-top:10px;color:var(--ink);font-weight:700;font-size:15px}
+      .dailyactions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+      .dailyinfo .msg{margin-top:8px}
       /* ---------- play view ---------- */
       .hidden{display:none!important}
       .playhead{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;justify-content:space-between;margin-top:6px}
@@ -260,6 +278,28 @@
           <div class="bar" aria-hidden="true"><i id="packBar"></i></div>
           <span class="stat"><b id="wordCount">0</b> CAPM terms in the pack</span>
         </div>
+        <div class="daily" id="dailySection">
+          <div class="dailyhead">
+            <div>
+              <div class="domain">Free · A new mini crossword every day</div>
+              <h2>Daily Puzzle</h2>
+              <p class="dailydate" id="dailyDate"></p>
+            </div>
+            <span class="dailystreak" id="dailyStreak"></span>
+          </div>
+          <div class="dailybody">
+            <div class="dailypreview" id="dailyPreview" aria-hidden="true"></div>
+            <div class="dailyinfo">
+              <p>A bite-size CAPM crossword, free for everyone — no unlock code, no pack needed. A new grid lands every morning; solve it daily to build your streak.</p>
+              <p class="dailystatus" id="dailyStatus"></p>
+              <div class="dailyactions">
+                <button class="btn primary" id="dailyPlay" type="button">Play today's puzzle</button>
+                <button class="btn gold hidden" id="dailyShare" type="button">Share result</button>
+              </div>
+              <p class="msg" id="dailyMsg" aria-live="polite"></p>
+            </div>
+          </div>
+        </div>
         <div class="bundle">
           <div>
             <h2>All 3 Packs — $4.99</h2>
@@ -304,6 +344,7 @@
             <div class="winbox hidden" id="winBox">
               <h3>Puzzle solved 🎉</h3>
               <p id="winStats"></p>
+              <button class="btn gold hidden" id="btnShareDaily" type="button">Share result</button>
               <button class="btn gold" id="btnNext" type="button">Next puzzle →</button>
               <button class="btn" id="btnBack2" type="button">Back to pack</button>
             </div>
@@ -591,8 +632,96 @@
       }
     ];
 
+    /* Seven FREE daily minis — one for each day of the week, picked by calendar
+       date. Newly constructed grids (not copies or re-slices of the pack
+       puzzles above); each was verified to interlock like the pack grids. */
+    var DAILY = [
+      {
+        rows:8, cols:8,
+        words:[
+          ["DESIGN",1,2,"A","An approach to problem-solving that starts with empathy for the user — ___ thinking"],
+          ["RISK",0,5,"D","An uncertain event or condition that, if it occurs, affects at least one project objective"],
+          ["REPORT",0,3,"D","A status ___ communicates progress, issues, and forecasts to stakeholders"],
+          ["NETWORK",1,7,"D","The schedule ___ diagram shows activities and their logical relationships"],
+          ["GANTT",5,0,"A","The bar chart that displays schedule activities against time"],
+          ["CHANGE",1,0,"D","A modification to a formally controlled document, deliverable, or baseline"],
+          ["TASK",7,4,"A","A small, defined piece of work to be performed by the team"]
+        ]
+      },
+      {
+        rows:6, cols:8,
+        words:[
+          ["MATRIX",1,2,"A","The RAM is this kind of chart, mapping work packages to the people responsible"],
+          ["GATE",0,3,"D","The phase-end review where continuing the project is decided — a phase ___"],
+          ["INPUT",1,6,"D","Data or documents that feed into a process"],
+          ["SPRINT",5,1,"A","A fixed-length timebox of one to four weeks that produces a usable increment"],
+          ["CREEP",3,0,"A","Uncontrolled expansion of the product or project scope — scope ___"],
+          ["RACI",1,0,"D","The chart spelling out who is Responsible, Accountable, Consulted, and Informed (initials)"]
+        ]
+      },
+      {
+        rows:7, cols:8,
+        words:[
+          ["ACTION",1,0,"A","A corrective ___ is taken to bring performance back in line with the plan"],
+          ["SCOPE",0,1,"D","The work performed to deliver a product with the specified features and functions"],
+          ["INPUT",0,5,"D","Data or documents that feed into a process"],
+          ["LEAD",4,0,"A","An acceleration that lets a successor activity start before its predecessor finishes"],
+          ["SUNK",3,4,"A","Already spent and unrecoverable — ___ costs are ignored in future decisions"],
+          ["BACKLOG",0,7,"D","The prioritized list of everything the product might need — the product ___"],
+          ["TESTING",6,1,"A","Evaluating a product through planned trials to find defects before delivery"]
+        ]
+      },
+      {
+        rows:7, cols:8,
+        words:[
+          ["QUALITY",0,0,"A","The degree to which a set of inherent characteristics fulfills requirements"],
+          ["AGILE",0,2,"D","An adaptive, iterative approach that welcomes change — the ___ Manifesto"],
+          ["CLOSURE",3,1,"A","Finalizing all activities and handing over the product — project ___"],
+          ["ISSUE",2,4,"D","A problem happening right now — unlike a risk, there is nothing uncertain about it"],
+          ["TEAM",2,7,"D","The people performing the work of the project"],
+          ["OWNER",6,1,"A","The product ___ prioritizes the backlog and represents the customer's voice"]
+        ]
+      },
+      {
+        rows:8, cols:8,
+        words:[
+          ["LESSONS",1,1,"A","Knowledge captured during the project so future teams can benefit — ___ learned"],
+          ["COST",0,5,"D","What the work requires in money — tracked against the budget"],
+          ["ASSIGN",0,3,"D","To give a team member responsibility for a task or deliverable"],
+          ["SPONSOR",1,7,"D","The person who champions the project and provides resources and support"],
+          ["PLAN",5,0,"A","The roadmap for how the project will be executed, monitored, and controlled"],
+          ["BUFFER",7,2,"A","Extra time added to an activity or path to protect the schedule — a schedule ___"],
+          ["FLOW",0,1,"D","How smoothly work moves through a system — Kanban boards visualize it"]
+        ]
+      },
+      {
+        rows:8, cols:8,
+        words:[
+          ["DOMAIN",1,2,"A","One of the four broad subject areas the CAPM exam content is organized into"],
+          ["IMPACT",0,4,"D","The effect a risk or change would have on project objectives"],
+          ["KANBAN",3,0,"A","The visual board method that limits work in progress to improve flow"],
+          ["AUDIT",3,1,"D","A structured review of whether project activities comply with policies and processes"],
+          ["NETWORK",1,7,"D","The schedule ___ diagram shows activities and their logical relationships"],
+          ["RISK",6,0,"A","An uncertain event or condition that, if it occurs, affects at least one project objective"],
+          ["TASK",0,0,"D","A small, defined piece of work to be performed by the team"],
+          ["SUNK",7,4,"A","Already spent and unrecoverable — ___ costs are ignored in future decisions"]
+        ]
+      },
+      {
+        rows:7, cols:8,
+        words:[
+          ["METRIC",0,0,"A","A measurable value used to assess performance, such as CPI or defect counts"],
+          ["ELICIT",0,1,"D","To draw out requirements through interviews, workshops, and observation"],
+          ["DIAGRAM",2,0,"A","A visual representation of information, such as a network ___"],
+          ["ROLE",2,4,"D","A defined function a person performs on the project, such as sponsor or manager"],
+          ["FLOAT",4,3,"A","The time an activity can slip without delaying the project finish date"],
+          ["IMPACT",1,6,"D","The effect a risk or change would have on project objectives"]
+        ]
+      }
+    ];
+
     /* ---------- derived structures ---------- */
-    PUZZLES.forEach(function(p){
+    function derivePuzzle(p){
       p.solution = {};   // "r,c" -> letter
       p.cellWords = {};  // "r,c" -> [wordIdx...]
       p.words.forEach(function(w, wi){
@@ -612,7 +741,9 @@
       }
       p.words.forEach(function(w){ p.wordNum.push(p.numbers[w[1]+","+w[2]]); });
       p.state = { entries:{}, correct:{}, revealed:{}, checks:0, solved:false, seconds:0 };
-    });
+    }
+    PUZZLES.forEach(derivePuzzle);
+    DAILY.forEach(derivePuzzle);
 
     var seenAnswers = {};
     PUZZLES.forEach(function(p){ p.words.forEach(function(w){ seenAnswers[w[0]]=1; }); });
@@ -649,6 +780,7 @@
       var data={};
       PUZZLES.forEach(function(p){ data[p.id]=p.state; });
       try{ window.localStorage.setItem(PROGRESS_KEY, JSON.stringify(data)); }catch(e){}
+      saveDailyData();
     }
     (function loadProgress(){
       var data=null;
@@ -661,6 +793,60 @@
       });
     })();
     window.addEventListener("pagehide", saveProgress);
+
+    /* ---------- daily puzzle: date selection, streak, own storage key ---------- */
+    var DAILY_KEY="capm-crosswords-daily";
+    function dateKeyOf(d){
+      var m=d.getMonth()+1, day=d.getDate();
+      return d.getFullYear()+"-"+(m<10?"0":"")+m+"-"+(day<10?"0":"")+day;
+    }
+    var nowDate=new Date();
+    var todayKey=dateKeyOf(nowDate);
+    var yesterdayKey=dateKeyOf(new Date(nowDate.getFullYear(), nowDate.getMonth(), nowDate.getDate()-1));
+    /* deterministic pick: whole days since the epoch, cycling through the seven */
+    var dailyIndex=Math.floor(Date.UTC(nowDate.getFullYear(), nowDate.getMonth(), nowDate.getDate())/86400000)%DAILY.length;
+    var dailyPuzzle=DAILY[dailyIndex];
+    dailyPuzzle.isDaily=true;
+    var dailyData={ streak:{current:0,best:0,lastSolved:null}, solved:{}, progress:{} };
+    try{
+      var dd=JSON.parse(window.localStorage.getItem(DAILY_KEY)||"null");
+      if (dd){
+        if (dd.streak) dailyData.streak={ current:dd.streak.current||0, best:dd.streak.best||0, lastSolved:dd.streak.lastSolved||null };
+        if (dd.solved) dailyData.solved=dd.solved;
+        if (dd.progress) dailyData.progress=dd.progress;
+      }
+    }catch(e){}
+    (function restoreDaily(){
+      var s=dailyData.progress[todayKey]; if(!s) return;
+      var st=dailyPuzzle.state;
+      st.entries=s.entries||{}; st.correct=s.correct||{}; st.revealed=s.revealed||{};
+      st.checks=s.checks||0; st.solved=!!s.solved; st.seconds=s.seconds||0;
+    })();
+    function saveDailyData(){
+      dailyData.progress={}; dailyData.progress[todayKey]=dailyPuzzle.state;
+      try{ window.localStorage.setItem(DAILY_KEY, JSON.stringify(dailyData)); }catch(e){}
+    }
+    function fmtClock(s){ var m=Math.floor(s/60), ss=s%60; return m+":"+(ss<10?"0":"")+ss; }
+    function dailyDateLabel(){
+      return nowDate.toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric"});
+    }
+    function shareText(){
+      var secs=dailyData.solved[todayKey];
+      return "I solved today's CAPM crossword in "+fmtClock(secs||0)+" — "+dailyData.streak.current+" day streak\nhttps://black-sand-04296a00f.8.azurestaticapps.net/";
+    }
+    function copyShareText(done){
+      var t=shareText();
+      function fallback(){
+        var ta=document.createElement("textarea");
+        ta.value=t; ta.style.position="fixed"; ta.style.opacity="0";
+        document.body.appendChild(ta); ta.select();
+        var ok=false; try{ ok=document.execCommand("copy"); }catch(e){}
+        document.body.removeChild(ta); done(ok);
+      }
+      if (navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(t).then(function(){ done(true); }, fallback);
+      } else fallback();
+    }
 
     /* ---------- pack view ---------- */
     var packGroups = document.getElementById("packGroups");
@@ -714,6 +900,88 @@
       document.getElementById("doneCount").textContent=done;
       document.getElementById("packBar").style.width=(100*done/PUZZLES.length)+"%";
     }
+
+    /* ---------- daily puzzle section (homepage) ---------- */
+    function renderDaily(){
+      document.getElementById("dailyDate").textContent="Today's puzzle · "+dailyDateLabel();
+      var st=dailyData.streak;
+      document.getElementById("dailyStreak").textContent = st.current>0
+        ? st.current+" day streak · Best "+st.best
+        : "No streak yet — start one today";
+      var pv=document.getElementById("dailyPreview");
+      pv.innerHTML="";
+      pv.style.gridTemplateColumns="repeat("+dailyPuzzle.cols+", 1fr)";
+      var pst=dailyPuzzle.state;
+      for (var r=0;r<dailyPuzzle.rows;r++) for (var c=0;c<dailyPuzzle.cols;c++){
+        var k=r+","+c, d=document.createElement("div");
+        if (!(k in dailyPuzzle.solution)){ d.className="dc block"; }
+        else {
+          d.className="dc"+((pst.correct[k]||pst.revealed[k])?" got":"");
+          d.textContent=(pst.correct[k]||pst.revealed[k]) ? dailyPuzzle.solution[k] : (pst.entries[k]||"");
+        }
+        pv.appendChild(d);
+      }
+      var status=document.getElementById("dailyStatus"),
+          play=document.getElementById("dailyPlay"),
+          share=document.getElementById("dailyShare");
+      if (dailyData.solved[todayKey]!=null){
+        status.textContent="Solved in "+fmtClock(dailyData.solved[todayKey])+" — nice work. A new grid lands tomorrow.";
+        play.textContent="Review today's puzzle";
+        share.classList.remove("hidden");
+      } else {
+        var filled=0, total=Object.keys(dailyPuzzle.solution).length;
+        Object.keys(dailyPuzzle.solution).forEach(function(k){ if (pst.correct[k]||pst.revealed[k]||pst.entries[k]) filled++; });
+        status.textContent = filled>0
+          ? "In progress — "+Math.round(100*filled/total)+"% filled. Pick up where you left off."
+          : "Free for everyone — no unlock code, no pack needed.";
+        play.textContent = filled>0 ? "Continue today's puzzle" : "Play today's puzzle";
+        share.classList.add("hidden");
+      }
+    }
+    function openDailyPuzzle(){
+      saveTimer();
+      curIdx=-1; cur=dailyPuzzle;
+      document.getElementById("btnDownload").classList.add("hidden");
+      document.getElementById("btnNext").classList.add("hidden");
+      document.getElementById("btnShareDaily").classList.add("hidden");
+      document.getElementById("packView").classList.add("hidden");
+      document.getElementById("playView").classList.remove("hidden");
+      document.getElementById("winBox").classList.add("hidden");
+      document.getElementById("pDomain").textContent="Daily Puzzle · Free";
+      document.getElementById("pTitle").textContent=dailyDateLabel();
+      say("");
+      buildBoard(); buildClues();
+      var first = cur.words.map(function(w,i){return i;}).sort(function(a,b){return cur.wordNum[a]-cur.wordNum[b];})[0];
+      selectWord(first, true);
+      startTimer();
+      window.scrollTo({top:0});
+    }
+    function onDailySolved(){
+      if (dailyData.solved[todayKey]==null){
+        dailyData.solved[todayKey]=dailyPuzzle.state.seconds;
+        var st=dailyData.streak;
+        st.current = (st.lastSolved===yesterdayKey) ? st.current+1 : 1;
+        if (st.current>st.best) st.best=st.current;
+        st.lastSolved=todayKey;
+      }
+      saveDailyData();
+      document.getElementById("winStats").textContent +=
+        " · "+dailyData.streak.current+" day streak (best "+dailyData.streak.best+")";
+      document.getElementById("btnShareDaily").classList.remove("hidden");
+    }
+    document.getElementById("dailyPlay").addEventListener("click", openDailyPuzzle);
+    document.getElementById("dailyShare").addEventListener("click", function(){
+      copyShareText(function(ok){
+        var m=document.getElementById("dailyMsg");
+        m.textContent = ok ? "Result copied — paste it anywhere to share your streak." : "Copy failed — your result: "+shareText();
+        m.className="msg "+(ok?"ok":"err");
+      });
+    });
+    document.getElementById("btnShareDaily").addEventListener("click", function(){
+      copyShareText(function(ok){
+        say(ok ? "Result copied — paste it anywhere to share your streak." : "Copy failed — your result: "+shareText(), ok?"ok":"err");
+      });
+    });
 
     /* ---------- buy panel: purchasing paused (coming soon) + unlock codes ---------- */
     /* Checkout is temporarily disabled — no payment links are used anywhere
@@ -928,6 +1196,8 @@
       saveTimer();
       curIdx=idx; cur=PUZZLES[idx];
       document.getElementById("btnDownload").classList.toggle("hidden", cur.id!==FREE_ID);
+      document.getElementById("btnNext").classList.remove("hidden");
+      document.getElementById("btnShareDaily").classList.add("hidden");
       document.getElementById("packView").classList.add("hidden");
       document.getElementById("playView").classList.remove("hidden");
       document.getElementById("winBox").classList.add("hidden");
@@ -945,7 +1215,7 @@
       saveTimer();
       document.getElementById("playView").classList.add("hidden");
       document.getElementById("packView").classList.remove("hidden");
-      renderPack(); window.scrollTo({top:0});
+      renderPack(); renderDaily(); window.scrollTo({top:0});
     }
     function startTimer(){
       clearInterval(timerId);
@@ -1144,6 +1414,7 @@
           (rev? " · "+rev+" letter"+(rev>1?"s":"")+" revealed":" · no letters revealed — clean solve!");
         document.getElementById("winBox").classList.remove("hidden");
         say("Puzzle complete ✓","ok");
+        if (cur.isDaily) onDailySolved();
         document.getElementById("winBox").scrollIntoView({behavior:"smooth",block:"nearest"});
       }
     }
@@ -1251,6 +1522,7 @@
     })();
 
     renderPack();
+    renderDaily();
     </script>
   </body>
 </html>
